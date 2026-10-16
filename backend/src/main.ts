@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+    // Izinkan frontend SvelteKit (mode dev) memanggil API
+  app.enableCors({ origin: 'http://localhost:5173' });
 
   // Semua input dicek otomatis berdasarkan aturan di DTO
   app.useGlobalPipes(
