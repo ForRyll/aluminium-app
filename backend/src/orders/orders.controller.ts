@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   Param,
+  ParseFloatPipe,
   ParseUUIDPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -26,5 +28,16 @@ export class OrdersController {
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.ordersService.findOne(id);
+  }
+
+  // Contoh: /orders/<id>/summary?price=3200000&targetMargin=20
+  @Get(':id/summary')
+  summary(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('price', new ParseFloatPipe({ optional: true })) price?: number,
+    @Query('targetMargin', new ParseFloatPipe({ optional: true }))
+    targetMargin?: number,
+  ) {
+    return this.ordersService.summary(id, price, targetMargin);
   }
 }

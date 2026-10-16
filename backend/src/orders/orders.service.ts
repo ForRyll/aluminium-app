@@ -96,4 +96,70 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Order tidak ditemukan');
     return order;
   }
+    // Ringkasan keuangan order. price dan targetMargin opsional,
+  // dipakai untuk simulasi tawar-menawar tanpa mengubah data order.
+  async summary(id: string, price?: number, targetMargin = 15) {
+    if (targetMargin < 0 || targetMargin >= 100) {
+      throw new BadRequestException('targetMargin harus antara 0 dan 99');
+    }
+
+    const order = await this.findOne(id);
+    const toCents = (v: string | number) => Math.round(Number(v) * 100);
+    const rp = (cents: number) => cents / 100;
+
+    // Total bahan = jumlah (quantity x harga satuan) semua item
+    const materialCents = order.items.reduce(
+      (sum, i) => sum + Math.round(Number(i.quantity) * toCents(i.unitPrice)),
+      0,
+    );
+    const laborCents = toCents(order.laborCost);
+    const deliveryCents = toCents(order.deliveryCost);
+    const otherCents = toCents(order.otherCost);
+    const costCents = materialCents + laborCents + deliveryCents + otherCents;
+
+    // Harga yang dinilai: dari simulasi, kalau tidak ada pakai harga tawar order
+    const priceCents =
+      price !== undefined
+        ? toCents(price)
+        : order.offeredPrice !== null
+          ? toCents(order.offeredPrice)
+          : null;
+
+    // Harga minimum agar margin mencapai target, dibulatkan ke atas per Rp1.000
+    const targetCents = Math.ceil(
+      Math.ceil(costCents / (1 - targetMargin / 100) / 100000) * 100000,
+    );
+
+    let evaluation: Record<string, unknown> | null = null;
+    if (priceCents !== null) {
+      const profitCents = priceCents - costCents;
+      const margin = priceCents > 0 ? (profitCents / priceCents) * 100 : 0;
+      evaluation = {
+        price: rp(priceCents),
+        profit: rp(profitCents),
+        marginPercent: Number(margin.toFixed(2)),
+        status:
+          profitCents < 0
+            ? 'rugi'
+            : margin < targetMargin
+              ? 'tipis'
+              : 'aman',
+      };
+    }
+
+    return {
+      orderNumber: order.orderNumber,
+      cost: {
+        material: rp(materialCents),
+        labor: rp(laborCents),
+        delivery: rp(deliveryCents),
+        other: rp(otherCents),
+        total: rp(costCents), // modal
+      },
+      breakEvenPrice: rp(costCents), // di bawah ini pasti rugi
+      targetMarginPercent: targetMargin,
+      recommendedMinPrice: rp(targetCents), // harga minimum untuk capai target
+      evaluation,
+    };
+  }
 }
