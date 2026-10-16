@@ -1,4 +1,4 @@
-import {
+﻿import {
   BadRequestException,
   Injectable,
   NotFoundException,
@@ -8,7 +8,8 @@ import { Like, Repository } from 'typeorm';
 import { Customer } from '../customers/entities/customer.entity';
 import { Material } from '../materials/entities/material.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { Order } from './entities/order.entity';
+import { Order, OrderStatus } from './entities/order.entity';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Injectable()
 export class OrdersService {
@@ -19,6 +20,16 @@ export class OrdersService {
     @InjectRepository(Material)
     private readonly materials: Repository<Material>,
   ) {}
+
+    // Alur yang diperbolehkan: dari status apa ke status apa
+  private readonly allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
+    draft: ['penawaran', 'batal'],
+    penawaran: ['draft', 'deal', 'batal'],
+    deal: ['dikerjakan', 'batal'],
+    dikerjakan: ['selesai', 'batal'],
+    selesai: [],
+    batal: [],
+  };
 
   // Nomor urut per tahun: ORD-2026-0001, ORD-2026-0002, dst
   private async nextOrderNumber() {
@@ -159,6 +170,39 @@ export class OrdersService {
       breakEvenPrice: rp(costCents), // di bawah ini pasti rugi
       targetMarginPercent: targetMargin,
       recommendedMinPrice: rp(targetCents), // harga minimum untuk capai target
+      evaluation,
+    };
+  }
+
+  async updateStatus(id: string, dto: UpdateOrderStatusDto) {
+    const order = await this.findOne(id);
+
+    const allowed = this.allowedTransitions[order.status];
+    if (!allowed.includes(dto.status)) {
+      throw new BadRequestException(
+        `Status ${order.status} tidak bisa langsung ke ${dto.status}. ` +
+          `Yang boleh: ${allowed.join(', ') || 'tidak ada (status akhir)'}`,
+      );
+    }
+
+    if (dto.finalPrice !== undefined) {
+      order.offeredPrice = dto.finalPrice.toFixed(2);
+    }
+    if (dto.status === 'deal' && order.offeredPrice === null) {
+      throw new BadRequestException(
+        'Isi finalPrice (harga kesepakatan) sebelum status deal',
+      );
+    }
+
+    order.status = dto.status;
+    await this.orders.save(order);
+
+    // Kembalikan status baru beserta evaluasi untung-rugi di harga terakhir
+    const { evaluation } = await this.summary(id);
+    return {
+      orderNumber: order.orderNumber,
+      status: order.status,
+      offeredPrice: order.offeredPrice,
       evaluation,
     };
   }

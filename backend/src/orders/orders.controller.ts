@@ -1,16 +1,17 @@
-import {
+﻿import {
   Body,
   Controller,
   Get,
   Param,
   ParseFloatPipe,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
@@ -39,5 +40,13 @@ export class OrdersController {
     targetMargin?: number,
   ) {
     return this.ordersService.summary(id, price, targetMargin);
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateOrderStatusDto
+  ) {
+    return this.ordersService.updateStatus(id, dto);
   }
 }
