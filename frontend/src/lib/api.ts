@@ -21,3 +21,11 @@ export function rupiah(value: string | number): string {
 		maximumFractionDigits: 0
 	}).format(Number(value));
 }
+// Bentuk data pelanggan dari backend
+export interface Customer {
+	id: string;
+	name: string;
+	phone: string | null;
+	address: string | null;
+	notes: string | null;
+}
