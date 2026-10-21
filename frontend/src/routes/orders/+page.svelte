@@ -15,7 +15,12 @@
 </script>
 
 <main class="mx-auto max-w-5xl p-6">
-	<h1 class="mb-4 text-2xl font-bold">Order</h1>
+		<div class="mb-4 flex items-center justify-between">
+		<h1 class="text-2xl font-bold">Order</h1>
+		<a href="/orders/new" class="rounded bg-orange-500 px-4 py-2 font-semibold text-white">
+			+ Buat order baru
+		</a>
+	</div>
 
 	{#if data.error}
 		<p class="rounded bg-red-100 p-3 text-red-700">Gagal memuat data: {data.error}</p>
