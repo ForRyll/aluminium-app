@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { rupiah } from '../../../lib/api';
 
-	let { data } = $props();
+	let { data, form } = $props();
 
 	// Warna hasil evaluasi: rugi merah, tipis kuning, aman hijau
 	const evalStyle: Record<string, string> = {
@@ -10,7 +11,30 @@
 		aman: 'bg-green-100 text-green-700 border-green-300'
 	};
 
+	// Alur status yang diizinkan, sama dengan aturan di backend
+	const transitions: Record<string, string[]> = {
+		draft: ['penawaran', 'batal'],
+		penawaran: ['draft', 'deal', 'batal'],
+		deal: ['dikerjakan', 'batal'],
+		dikerjakan: ['selesai', 'batal'],
+		selesai: [],
+		batal: []
+	};
+
+	const label: Record<string, string> = {
+		draft: 'Kembali ke draft',
+		penawaran: 'Jadikan penawaran',
+		deal: 'Tandai deal',
+		dikerjakan: 'Mulai dikerjakan',
+		selesai: 'Tandai selesai',
+		batal: 'Batalkan order'
+	};
+
 	let ev = $derived(data.summary.evaluation);
+	let next = $derived(transitions[data.order.status] ?? []);
+
+	// true selama form dikirim, mencegah kiriman ganda
+	let submitting = $state(false);
 </script>
 
 <main class="mx-auto max-w-4xl p-6">
@@ -21,6 +45,64 @@
 		{data.order.orderNumber} · {data.order.customer?.name} · status
 		<strong>{data.order.status}</strong>
 	</p>
+
+	{#if form?.messages}
+		<ul class="mb-4 rounded bg-red-100 p-3 text-red-700">
+			{#each form.messages as m}
+				<li>{m}</li>
+			{/each}
+		</ul>
+	{/if}
+	{#if form?.success}
+		<p class="mb-4 rounded bg-green-100 p-3 text-green-700">{form.message}</p>
+	{/if}
+
+	<!-- Panel ubah status -->
+	<section class="mb-6 rounded border p-4">
+		<h2 class="mb-2 text-lg font-semibold">Status order</h2>
+		{#if next.length === 0}
+			<p class="text-gray-500">Order ini sudah di status akhir ({data.order.status}).</p>
+		{:else}
+			<div class="flex flex-wrap items-end gap-4">
+				{#each next as s (s)}
+					<form
+						method="POST"
+						action="?/status"
+						class="flex items-end gap-2"
+						use:enhance={({ cancel }) => {
+							if (s === 'batal' && !confirm('Batalkan order ini? Tindakan ini tidak bisa dibalikkan.')) {
+								cancel();
+								return;
+							}
+							submitting = true;
+							return async ({ update }) => {
+								await update();
+								submitting = false;
+							};
+						}}
+					>
+						<input type="hidden" name="status" value={s} />
+						{#if s === 'deal'}
+							<label class="flex flex-col text-sm">
+								Harga kesepakatan (Rp)
+								<input name="finalPrice" type="number" min="0" step="1000" required
+									value={data.order.offeredPrice ? Number(data.order.offeredPrice) : ''}
+									class="w-44 rounded border px-3 py-2" />
+							</label>
+						{/if}
+						<button
+							disabled={submitting}
+							class="rounded px-4 py-2 font-semibold disabled:opacity-50 {s === 'batal'
+								? 'border border-red-400 text-red-600'
+								: 'bg-orange-500 text-white'}"
+						>
+							{label[s]}
+						</button>
+					</form>
+				{/each}
+			</div>
+		{/if}
+	</section>
 
 	<!-- Rincian bahan -->
 	<h2 class="mb-2 text-lg font-semibold">Rincian bahan</h2>
