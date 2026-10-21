@@ -38,7 +38,12 @@
 </script>
 
 <main class="mx-auto max-w-4xl p-6">
-	<a href="/orders" class="text-sm text-orange-600 underline">← Semua order</a>
+		<div class="flex items-center justify-between">
+		<a href="/orders" class="text-sm text-orange-600 underline">← Semua order</a>
+		<a href="/orders/{data.order.id}/nota" class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600">
+			Cetak nota
+		</a>
+	</div>
 
 	<h1 class="mt-2 text-2xl font-bold">{data.order.title}</h1>
 	<p class="mb-6 text-gray-600">
