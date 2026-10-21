@@ -42,6 +42,7 @@ export interface OrderItem {
 // Bentuk data order dari backend
 export interface Order {
 	id: string;
+	createdAt: string;
 	orderNumber: string;
 	title: string;
 	status: 'draft' | 'penawaran' | 'deal' | 'dikerjakan' | 'selesai' | 'batal';
