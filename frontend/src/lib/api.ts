@@ -29,3 +29,38 @@ export interface Customer {
 	address: string | null;
 	notes: string | null;
 }
+
+// Satu komponen dalam order
+export interface OrderItem {
+	id: string;
+	description: string;
+	unit: string;
+	quantity: string;
+	unitPrice: string;
+}
+
+// Bentuk data order dari backend
+export interface Order {
+	id: string;
+	orderNumber: string;
+	title: string;
+	status: 'draft' | 'penawaran' | 'deal' | 'dikerjakan' | 'selesai' | 'batal';
+	offeredPrice: string | null;
+	customer: Customer;
+	items?: OrderItem[];
+}
+
+// Ringkasan keuangan dari /orders/:id/summary
+export interface OrderSummary {
+	orderNumber: string;
+	cost: { material: number; labor: number; delivery: number; other: number; total: number };
+	breakEvenPrice: number;
+	targetMarginPercent: number;
+	recommendedMinPrice: number;
+	evaluation: {
+		price: number;
+		profit: number;
+		marginPercent: number;
+		status: 'rugi' | 'tipis' | 'aman';
+	} | null;
+}
