@@ -3,8 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MaterialsModule } from './materials/materials.module';
+import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
+import { MaterialsModule } from './materials/materials.module';
 import { OrdersModule } from './orders/orders.module';
 
 @Module({
@@ -30,10 +31,9 @@ import { OrdersModule } from './orders/orders.module';
     }),
 
     MaterialsModule,
-
     CustomersModule,
-
     OrdersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
