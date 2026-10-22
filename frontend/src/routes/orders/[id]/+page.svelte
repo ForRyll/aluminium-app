@@ -38,15 +38,25 @@
 </script>
 
 <main class="mx-auto max-w-4xl p-6">
-			<div class="flex items-center justify-between">
+	<div class="flex items-center justify-between">
 		<a href="/orders" class="text-sm text-orange-600 underline">← Semua order</a>
-		<a
-			href="/orders/{data.order.id}/nota"
-			class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
-		>
-			Cetak nota
-		</a>
-			</div>
+		<div class="flex gap-2">
+			{#if data.order.status === 'draft' || data.order.status === 'penawaran'}
+				<a
+					href="/orders/{data.order.id}/edit"
+					class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
+				>
+					Ubah order
+				</a>
+			{/if}
+			<a
+				href="/orders/{data.order.id}/nota"
+				class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
+			>
+				Cetak nota
+			</a>
+		</div>
+	</div>
 	<h1 class="mt-2 text-2xl font-bold">{data.order.title}</h1>
 	<p class="mb-6 text-gray-600">
 		{data.order.orderNumber} · {data.order.customer?.name} · status
