@@ -79,7 +79,9 @@
 				<tbody>
 					{#each data.customers as c (c.id)}
 						<tr class="border-b">
-							<td class="p-2 font-medium">{c.name}</td>
+							<td class="p-2 font-medium">
+								<a href="/customers/{c.id}" class="text-orange-600 underline">{c.name}</a>
+							</td><td class="p-2 font-medium">{c.name}</td>
 							<td class="p-2">{c.phone ?? '-'}</td>
 							<td class="p-2">{c.address ?? '-'}</td>
 							<td class="p-2">{c.notes ?? '-'}</td>
