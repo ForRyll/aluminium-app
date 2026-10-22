@@ -1,6 +1,27 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { API_URL } from '../../../lib/api';
-import type { Actions } from './$types';
+import { API_URL, type Customer, type Material } from '../../../lib/api';
+import type { Actions, PageServerLoad } from './$types';
+
+// Dijalankan di server: ambil pelanggan dan material untuk pilihan di form
+export const load: PageServerLoad = async ({ fetch }) => {
+	const [cRes, mRes] = await Promise.all([
+		fetch(`${API_URL}/customers`),
+		fetch(`${API_URL}/materials`)
+	]);
+
+	if (!cRes.ok || !mRes.ok) {
+		return {
+			customers: [] as Customer[],
+			materials: [] as Material[],
+			error: 'Backend tidak bisa dihubungi'
+		};
+	}
+	return {
+		customers: (await cRes.json()) as Customer[],
+		materials: (await mRes.json()) as Material[],
+		error: null
+	};
+};
 
 interface ItemInput {
 	mode: 'catalog' | 'free';
@@ -59,7 +80,6 @@ export const actions: Actions = {
 		});
 
 		if (!res.ok) {
-			// Backend mengirim daftar pesan validasi, tampilkan apa adanya
 			const err = await res.json().catch(() => null);
 			const messages: string[] = Array.isArray(err?.message)
 				? err.message
