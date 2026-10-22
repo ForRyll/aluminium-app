@@ -8,8 +8,11 @@ import { Like, Repository } from 'typeorm';
 import { Customer } from '../customers/entities/customer.entity';
 import { Material } from '../materials/entities/material.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { Order, OrderStatus } from './entities/order.entity';
+import { OrderItemDto } from './dto/order-item.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { OrderItem } from './entities/order-item.entity';
+import { Order, OrderStatus } from './entities/order.entity';
 
 @Injectable()
 export class OrdersService {
@@ -21,7 +24,7 @@ export class OrdersService {
     private readonly materials: Repository<Material>,
   ) {}
 
-    // Alur yang diperbolehkan: dari status apa ke status apa
+  // Alur yang diperbolehkan: dari status apa ke status apa
   private readonly allowedTransitions: Record<OrderStatus, OrderStatus[]> = {
     draft: ['penawaran', 'batal'],
     penawaran: ['draft', 'deal', 'batal'],
@@ -30,6 +33,9 @@ export class OrdersService {
     selesai: [],
     batal: [],
   };
+
+  // Order hanya boleh diedit selama belum deal
+  private readonly editableStatuses: OrderStatus[] = ['draft', 'penawaran'];
 
   // Nomor urut per tahun: ORD-2026-0001, ORD-2026-0002, dst
   private async nextOrderNumber() {
@@ -40,12 +46,18 @@ export class OrdersService {
     return `ORD-${year}-${String(count + 1).padStart(4, '0')}`;
   }
 
-  async create(dto: CreateOrderDto) {
-    const customer = await this.customers.findOneBy({ id: dto.customerId });
-    if (!customer) throw new NotFoundException('Pelanggan tidak ditemukan');
+  // Ubah daftar item dari layar menjadi data siap simpan.
+  // Item katalog: harga disalin dari katalog (snapshot). Item bebas: diisi manual.
+  private async buildItems(dtoItems: OrderItemDto[]) {
+    const items: {
+      material: Material | null;
+      description: string;
+      unit: string;
+      quantity: string;
+      unitPrice: string;
+    }[] = [];
 
-    const items = [];
-    for (const i of dto.items) {
+    for (const i of dtoItems) {
       let material: Material | null = null;
       if (i.materialId) {
         material = await this.materials.findOneBy({ id: i.materialId });
@@ -73,15 +85,21 @@ export class OrdersService {
         description,
         unit,
         quantity: i.quantity.toFixed(3),
-        unitPrice, // snapshot harga saat order dibuat
+        unitPrice,
       });
     }
+    return items;
+  }
+
+  async create(dto: CreateOrderDto) {
+    const customer = await this.customers.findOneBy({ id: dto.customerId });
+    if (!customer) throw new NotFoundException('Pelanggan tidak ditemukan');
 
     const order = this.orders.create({
       orderNumber: await this.nextOrderNumber(),
       customer,
       title: dto.title,
-      items,
+      items: await this.buildItems(dto.items),
       laborCost: (dto.laborCost ?? 0).toFixed(2),
       deliveryCost: (dto.deliveryCost ?? 0).toFixed(2),
       otherCost: (dto.otherCost ?? 0).toFixed(2),
@@ -107,7 +125,64 @@ export class OrdersService {
     if (!order) throw new NotFoundException('Order tidak ditemukan');
     return order;
   }
-    // Ringkasan keuangan order. price dan targetMargin opsional,
+
+  // Edit order. Hanya saat draft atau penawaran.
+  // Kalau items dikirim, seluruh daftar item diganti dalam satu transaksi.
+  async update(id: string, dto: UpdateOrderDto) {
+    const order = await this.findOne(id);
+
+    if (!this.editableStatuses.includes(order.status)) {
+      throw new BadRequestException(
+        `Order berstatus ${order.status} tidak bisa diedit. ` +
+          `Hanya order draft atau penawaran yang boleh diedit`,
+      );
+    }
+
+    // Siapkan item baru lebih dulu, supaya input yang salah ditolak sebelum ada yang diubah
+    const newItems = dto.items ? await this.buildItems(dto.items) : null;
+
+    await this.orders.manager.transaction(async (manager) => {
+      const patch: Partial<
+        Pick<
+          Order,
+          | 'title'
+          | 'laborCost'
+          | 'deliveryCost'
+          | 'otherCost'
+          | 'offeredPrice'
+          | 'notes'
+        >
+      > = {};
+
+      if (dto.title !== undefined) patch.title = dto.title;
+      if (dto.laborCost !== undefined) patch.laborCost = dto.laborCost.toFixed(2);
+      if (dto.deliveryCost !== undefined) {
+        patch.deliveryCost = dto.deliveryCost.toFixed(2);
+      }
+      if (dto.otherCost !== undefined) patch.otherCost = dto.otherCost.toFixed(2);
+      if (dto.offeredPrice !== undefined) {
+        patch.offeredPrice = dto.offeredPrice.toFixed(2);
+      }
+      if (dto.notes !== undefined) patch.notes = dto.notes;
+
+      if (Object.keys(patch).length > 0) {
+        await manager.update(Order, id, patch);
+      }
+
+      if (newItems) {
+        // Hapus semua item lama, lalu buat item baru
+        await manager.remove(OrderItem, order.items);
+        const created = newItems.map((i) =>
+          manager.create(OrderItem, { ...i, order: { id } }),
+        );
+        await manager.save(created);
+      }
+    });
+
+    return this.findOne(id);
+  }
+
+  // Ringkasan keuangan order. price dan targetMargin opsional,
   // dipakai untuk simulasi tawar-menawar tanpa mengubah data order.
   async summary(id: string, price?: number, targetMargin = 15) {
     if (targetMargin < 0 || targetMargin >= 100) {

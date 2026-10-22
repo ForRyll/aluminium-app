@@ -1,4 +1,7 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { CreateOrderDto } from './create-order.dto';
 
-export class UpdateOrderDto extends PartialType(CreateOrderDto) {}
+// Semua kolom opsional. Pelanggan tidak bisa diganti lewat edit.
+export class UpdateOrderDto extends PartialType(
+  OmitType(CreateOrderDto, ['customerId'] as const),
+) {}

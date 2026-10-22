@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 // Dijalankan di server: ambil detail order dan ringkasan keuangannya.
 // ?price= dan ?targetMargin= dipakai untuk simulasi tawar-menawar.
-export const load: PageServerLoad = async ({ fetch, params, url }) => {
+export const load: PageServerLoad = async ({ fetch, params, url, locals }) => {
 	const price = url.searchParams.get('price')?.trim() ?? '';
 	const targetMargin = url.searchParams.get('targetMargin')?.trim() ?? '';
 
@@ -19,8 +19,16 @@ export const load: PageServerLoad = async ({ fetch, params, url }) => {
 	]);
 
 	if (orderRes.status === 404) error(404, 'Order tidak ditemukan');
-	if (!orderRes.ok || !summaryRes.ok) error(502, 'Backend tidak bisa dihubungi');
-
+		if (!orderRes.ok || !summaryRes.ok) {
+		// Sementara: catat status asli dari backend untuk melacak 502
+		console.log('DETAIL ORDER GAGAL ->', {
+			orderStatus: orderRes.status,
+			summaryStatus: summaryRes.status,
+			hasToken: !!locals.token,
+			path: url.pathname
+		});
+		error(502, 'Backend tidak bisa dihubungi');
+	}
 	return {
 		order: (await orderRes.json()) as Order,
 		summary: (await summaryRes.json()) as OrderSummary,
