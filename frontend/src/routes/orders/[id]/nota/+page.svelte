@@ -10,13 +10,12 @@
 		telp: 'No. telepon diisi di sini'
 	};
 
-	const tanggal = $derived(
-		new Date(data.order.createdAt as unknown as string).toLocaleDateString('id-ID', {
-			day: 'numeric',
-			month: 'long',
-			year: 'numeric'
-		})
-	);
+	const format = (d: string) =>
+		new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+	const tanggal = $derived(format(data.order.createdAt));
+	const pay = $derived(data.pay);
+	const lunas = $derived(pay !== null && pay.remaining !== null && pay.remaining <= 0);
 </script>
 
 <main class="nota mx-auto max-w-2xl p-8">
@@ -66,9 +65,37 @@
 	</table>
 
 	{#if data.order.offeredPrice}
-		<p class="mb-10 text-right text-lg">
-			Total: <strong>{rupiah(data.order.offeredPrice)}</strong>
-		</p>
+		<div class="mb-8 ml-auto max-w-xs text-sm">
+			<div class="flex justify-between text-lg">
+				<span>Total</span>
+				<strong>{rupiah(data.order.offeredPrice)}</strong>
+			</div>
+
+			<!-- Pembayaran yang sudah diterima -->
+			{#if pay && pay.payments.length > 0}
+				<div class="mt-3 border-t pt-2">
+					{#each pay.payments as p (p.id)}
+						<div class="flex justify-between">
+							<span>{p.note ? `${p.note}, ` : ''}{format(p.paidAt)}</span>
+							<span>{rupiah(p.amount)}</span>
+						</div>
+					{/each}
+					<div class="mt-1 flex justify-between border-t pt-1">
+						<span>Sudah dibayar</span>
+						<span>{rupiah(pay.totalPaid)}</span>
+					</div>
+				</div>
+
+				{#if lunas}
+					<p class="mt-2 text-right text-lg font-bold">LUNAS</p>
+				{:else if pay.remaining !== null}
+					<div class="mt-1 flex justify-between text-lg font-bold">
+						<span>Sisa tagihan</span>
+						<span>{rupiah(pay.remaining)}</span>
+					</div>
+				{/if}
+			{/if}
+		</div>
 	{:else}
 		<p class="no-print mb-10 rounded bg-yellow-100 p-3 text-yellow-800">
 			Harga belum diisi. Isi harga kesepakatan dulu di halaman order.
