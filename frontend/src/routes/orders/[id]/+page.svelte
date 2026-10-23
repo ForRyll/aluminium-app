@@ -38,7 +38,7 @@
 </script>
 
 <main class="mx-auto max-w-4xl p-6">
-	<div class="flex items-center justify-between">
+		<div class="flex items-center justify-between">
 		<a href="/orders" class="text-sm text-orange-600 underline">← Semua order</a>
 		<div class="flex gap-2">
 			{#if data.order.status === 'draft' || data.order.status === 'penawaran'}
@@ -47,6 +47,14 @@
 					class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
 				>
 					Ubah order
+				</a>
+			{/if}
+			{#if ['deal', 'dikerjakan', 'selesai'].includes(data.order.status)}
+				<a
+					href="/orders/{data.order.id}/pembayaran"
+					class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
+				>
+					Pembayaran
 				</a>
 			{/if}
 			<a
