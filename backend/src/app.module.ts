@@ -24,9 +24,9 @@ import { OrdersModule } from './orders/orders.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         autoLoadEntities: true,
-        // Tabel dibuat otomatis dari kode. HANYA untuk tahap belajar,
-        // nanti kita ganti ke migration sebelum dipakai beneran.
-        synchronize: true,
+        // Hanya menyala di laptop (DB_SYNC=true). Di server online harus false,
+        // karena synchronize bisa menghapus data kalau struktur tabel berubah.
+        synchronize: config.get<string>('DB_SYNC') === 'true',
       }),
     }),
 
