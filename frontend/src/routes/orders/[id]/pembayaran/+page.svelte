@@ -1,168 +1,159 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
-  import { rupiah } from "../../../../lib/api";
-  import MoneyInput from "../../../../lib/components/MoneyInput.svelte";
+	import { enhance } from '$app/forms';
+	import { rupiah } from '../../../../lib/api';
+	import MoneyInput from '../../../../lib/components/MoneyInput.svelte';
 
-  let { data, form } = $props();
+	let { data, form } = $props();
 
-  // true selama form dikirim, mencegah kiriman ganda
-  let submitting = $state(false);
+	// true selama form dikirim, mencegah kiriman ganda
+	let submitting = $state(false);
+	let amount = $state(0);
 
-  // Tanggal hari ini (YYYY-MM-DD) sebagai isian awal
-  const today = new Date().toLocaleDateString("en-CA");
+	// Tanggal hari ini (YYYY-MM-DD) sebagai isian awal
+	const today = new Date().toLocaleDateString('en-CA');
 
-  let info = $derived(data.info);
-  let lunas = $derived(info.remaining !== null && info.remaining <= 0);
+	// Warna lencana per status order
+	const badge: Record<string, string> = {
+		draft: 'bg-gray-200 text-gray-700',
+		penawaran: 'bg-blue-100 text-blue-700',
+		deal: 'bg-amber-100 text-amber-700',
+		dikerjakan: 'bg-purple-100 text-purple-700',
+		selesai: 'bg-green-100 text-green-700',
+		batal: 'bg-red-100 text-red-700'
+	};
 
-  const tanggal = (d: string) =>
-    new Date(d).toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+	let info = $derived(data.info);
+	let lunas = $derived(info.remaining !== null && info.remaining <= 0);
+
+	const tanggal = (d: string) =>
+		new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 </script>
 
-<main class="mx-auto max-w-3xl p-6">
-  <a href="/orders/{data.orderId}" class="text-sm text-brand-600 underline"
-    >← Kembali ke order</a
-  >
-  <h1 class="mt-2 mb-1 text-2xl font-bold">Pembayaran {info.orderNumber}</h1>
-  <p class="mb-4 text-gray-600">Status order: <strong>{info.status}</strong></p>
+<main class="mx-auto max-w-3xl p-4 md:p-6">
+	<a href="/orders/{data.orderId}" class="text-sm text-brand-600 underline">← Kembali ke order</a>
+	<h1 class="page-title mt-2 mb-1">Pembayaran {info.orderNumber}</h1>
+	<p class="mb-4 text-gray-600">
+		Status order:
+		<span class="rounded-full px-3 py-1 text-sm {badge[info.status]}">{info.status}</span>
+	</p>
 
-  {#if form?.messages}
-    <ul class="mb-4 rounded bg-red-100 p-3 text-red-700">
-      {#each form.messages as m}
-        <li>{m}</li>
-      {/each}
-    </ul>
-  {/if}
-  {#if form?.success}
-    <p class="mb-4 rounded bg-green-100 p-3 text-green-700">{form.message}</p>
-  {/if}
+	{#if form?.messages}
+		<ul class="mb-4 rounded-lg bg-red-100 p-3 text-red-700">
+			{#each form.messages as m}
+				<li>{m}</li>
+			{/each}
+		</ul>
+	{/if}
+	{#if form?.success}
+		<p class="mb-4 rounded-lg bg-green-100 p-3 text-green-700">{form.message}</p>
+	{/if}
 
-  <!-- Ringkasan -->
-  <dl class="mb-6 grid max-w-md grid-cols-2 gap-y-1">
-    <dt>Harga kesepakatan</dt>
-    <dd class="text-right">
-      {info.agreedPrice !== null ? rupiah(info.agreedPrice) : "-"}
-    </dd>
-    <dt>Sudah dibayar</dt>
-    <dd class="text-right">{rupiah(info.totalPaid)}</dd>
-    <dt class="border-t pt-1 font-bold">Sisa tagihan</dt>
-    <dd class="border-t pt-1 text-right font-bold">
-      {info.remaining !== null ? rupiah(info.remaining) : "-"}
-    </dd>
-  </dl>
+	<!-- Ringkasan -->
+	<section class="card mb-4">
+		<dl class="grid max-w-md grid-cols-2 gap-y-1">
+			<dt>Harga kesepakatan</dt>
+			<dd class="text-right">{info.agreedPrice !== null ? rupiah(info.agreedPrice) : '-'}</dd>
+			<dt>Sudah dibayar</dt>
+			<dd class="text-right">{rupiah(info.totalPaid)}</dd>
+			<dt class="border-t pt-1 text-lg font-bold">Sisa tagihan</dt>
+			<dd class="border-t pt-1 text-right text-lg font-bold text-brand-800">
+				{info.remaining !== null ? rupiah(info.remaining) : '-'}
+			</dd>
+		</dl>
+		{#if lunas}
+			<p class="mt-3 rounded-lg border border-green-300 bg-green-100 p-3 text-center font-bold text-green-700">
+				LUNAS
+			</p>
+		{/if}
+	</section>
 
-  {#if lunas}
-    <p
-      class="mb-6 rounded border border-green-300 bg-green-100 p-3 font-semibold text-green-700"
-    >
-      LUNAS
-    </p>
-  {/if}
+	<!-- Form catat pembayaran -->
+	{#if ['deal', 'dikerjakan', 'selesai'].includes(info.status) && !lunas}
+		<section class="card mb-4">
+			<h2 class="mb-3 text-lg font-semibold text-brand-900">Catat pembayaran</h2>
+			<form
+				method="POST"
+				action="?/add"
+				class="grid gap-3 sm:grid-cols-2"
+				use:enhance={() => {
+					submitting = true;
+					return async ({ result, update }) => {
+						await update();
+						if (result.type === 'success') amount = 0;
+						submitting = false;
+					};
+				}}
+			>
+				<label class="flex flex-col gap-1 text-sm">
+					Jumlah
+					<MoneyInput name="amount" required max={info.remaining ?? undefined} bind:value={amount} />
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					Tanggal diterima
+					<input name="paidAt" type="date" value={today} required class="field" />
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					Cara bayar
+					<select name="method" class="field">
+						<option value="tunai">Tunai</option>
+						<option value="transfer">Transfer</option>
+						<option value="lainnya">Lainnya</option>
+					</select>
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					Keterangan (opsional)
+					<input name="note" placeholder="mis. DP 50%" class="field" />
+				</label>
+				<button disabled={submitting} class="btn sm:col-span-2">
+					{submitting ? 'Menyimpan...' : 'Simpan pembayaran'}
+				</button>
+			</form>
+		</section>
+	{:else if !lunas}
+		<p class="mb-4 rounded-lg bg-yellow-100 p-3 text-yellow-800">
+			Pembayaran baru bisa dicatat setelah order berstatus deal.
+		</p>
+	{/if}
 
-  <!-- Form catat pembayaran -->
-  {#if ["deal", "dikerjakan", "selesai"].includes(info.status) && !lunas}
-    <h2 class="mb-2 text-lg font-semibold">Catat pembayaran</h2>
-    <form
-      method="POST"
-      action="?/add"
-      class="mb-8 grid gap-3 sm:grid-cols-2"
-      use:enhance={() => {
-        submitting = true;
-        return async ({ update }) => {
-          await update();
-          submitting = false;
-        };
-      }}
-    >
-      <label class="flex flex-col text-sm">
-        Jumlah
-        <MoneyInput name="amount" required max={info.remaining ?? undefined} />
-      </label>
-      <label class="flex flex-col text-sm">
-        Tanggal diterima
-        <input
-          name="paidAt"
-          type="date"
-          value={today}
-          required
-          class="rounded border px-3 py-2"
-        />
-      </label>
-      <label class="flex flex-col text-sm">
-        Cara bayar
-        <select name="method" class="rounded border px-3 py-2">
-          <option value="tunai">Tunai</option>
-          <option value="transfer">Transfer</option>
-          <option value="lainnya">Lainnya</option>
-        </select>
-      </label>
-      <label class="flex flex-col text-sm">
-        Keterangan (opsional)
-        <input
-          name="note"
-          placeholder="mis. DP 50%"
-          class="rounded border px-3 py-2"
-        />
-      </label>
-      <button
-        disabled={submitting}
-        class="rounded bg-brand-500 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2"
-      >
-        {submitting ? "Menyimpan..." : "Simpan pembayaran"}
-      </button>
-    </form>
-  {:else if !lunas}
-    <p class="mb-8 rounded bg-yellow-100 p-3 text-yellow-800">
-      Pembayaran baru bisa dicatat setelah order berstatus deal.
-    </p>
-  {/if}
-
-  <!-- Riwayat -->
-  <h2 class="mb-2 text-lg font-semibold">Riwayat pembayaran</h2>
-  {#if info.payments.length === 0}
-    <p class="text-gray-500">Belum ada pembayaran.</p>
-  {:else}
-    <div class="overflow-x-auto">
-      <table class="w-full border-collapse text-left">
-        <thead>
-          <tr class="border-b bg-gray-100">
-            <th class="p-2">Tanggal</th>
-            <th class="p-2">Cara</th>
-            <th class="p-2">Keterangan</th>
-            <th class="p-2 text-right">Jumlah</th>
-            <th class="p-2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each info.payments as p (p.id)}
-            <tr class="border-b">
-              <td class="p-2">{tanggal(p.paidAt)}</td>
-              <td class="p-2">{p.method}</td>
-              <td class="p-2">{p.note ?? "-"}</td>
-              <td class="p-2 text-right">{rupiah(p.amount)}</td>
-              <td class="p-2">
-                <form
-                  method="POST"
-                  action="?/remove"
-                  use:enhance={({ cancel }) => {
-                    if (!confirm("Hapus pembayaran ini?")) cancel();
-                  }}
-                >
-                  <input type="hidden" name="paymentId" value={p.id} />
-                  <button
-                    class="rounded border border-red-400 px-3 py-1 text-sm text-red-600"
-                  >
-                    Hapus
-                  </button>
-                </form>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-  {/if}
+	<!-- Riwayat -->
+	<section class="card overflow-x-auto p-0">
+		<h2 class="p-4 pb-2 text-lg font-semibold text-brand-900">Riwayat pembayaran</h2>
+		{#if info.payments.length === 0}
+			<p class="p-4 pt-0 text-gray-500">Belum ada pembayaran.</p>
+		{:else}
+			<table class="tbl">
+				<thead>
+					<tr>
+						<th>Tanggal</th>
+						<th>Cara</th>
+						<th>Keterangan</th>
+						<th class="text-right">Jumlah</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each info.payments as p (p.id)}
+						<tr>
+							<td>{tanggal(p.paidAt)}</td>
+							<td>{p.method}</td>
+							<td>{p.note ?? '-'}</td>
+							<td class="text-right">{rupiah(p.amount)}</td>
+							<td>
+								<form
+									method="POST"
+									action="?/remove"
+									use:enhance={({ cancel }) => {
+										if (!confirm('Hapus pembayaran ini?')) cancel();
+									}}
+								>
+									<input type="hidden" name="paymentId" value={p.id} />
+									<button class="btn-danger">Hapus</button>
+								</form>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{/if}
+	</section>
 </main>

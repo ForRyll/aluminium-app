@@ -56,13 +56,13 @@
 	let margin = $derived(Number(offeredPrice) > 0 ? (profit / Number(offeredPrice)) * 100 : 0);
 </script>
 
-<main class="mx-auto max-w-4xl p-6">
+<main class="mx-auto max-w-4xl p-4 md:p-6">
 	<a href="/orders/{data.orderId}" class="text-sm text-brand-600 underline">← Kembali ke order</a>
-	<h1 class="mt-2 text-2xl font-bold">Ubah order {data.orderNumber}</h1>
+	<h1 class="page-title mt-2">Ubah order {data.orderNumber}</h1>
 	<p class="mb-4 text-gray-600">Pelanggan: {data.customerName} (tidak bisa diganti)</p>
 
 	{#if form?.messages}
-		<ul class="mb-4 rounded bg-red-100 p-3 text-red-700">
+		<ul class="mb-4 rounded-lg bg-red-100 p-3 text-red-700">
 			{#each form.messages as m}
 				<li>{m}</li>
 			{/each}
@@ -80,113 +80,110 @@
 			};
 		}}
 	>
-		<label class="flex flex-col text-sm">
-			Nama pekerjaan
-			<input name="title" required bind:value={title} class="rounded border px-3 py-2" />
-		</label>
+		<!-- Data pekerjaan -->
+		<section class="card">
+			<label class="flex flex-col gap-1 text-sm">
+				Nama pekerjaan
+				<input name="title" required bind:value={title} class="field" />
+			</label>
+		</section>
 
 		<!-- Daftar item -->
-		<h2 class="mt-2 text-lg font-semibold">Item pekerjaan</h2>
-		<input type="hidden" name="items" value={JSON.stringify(items)} />
+		<section class="card">
+			<h2 class="mb-3 text-lg font-semibold text-brand-900">Item pekerjaan</h2>
+			<input type="hidden" name="items" value={JSON.stringify(items)} />
 
-		{#each items as item, idx}
-			<div class="grid gap-2 rounded border p-3 sm:grid-cols-6">
-				<select bind:value={item.mode} class="rounded border px-2 py-2">
-					<option value="catalog">Dari katalog</option>
-					<option value="free">Isi bebas</option>
-				</select>
+			<div class="grid gap-3">
+				{#each items as item, idx}
+					<div class="grid gap-2 rounded-xl border border-brand-100 bg-brand-50/50 p-3 sm:grid-cols-6">
+						<select bind:value={item.mode} class="field">
+							<option value="catalog">Dari katalog</option>
+							<option value="free">Isi bebas</option>
+						</select>
 
-				{#if item.mode === 'catalog'}
-					<select
-						value={item.materialId}
-						onchange={(e) => {
-							item.materialId = e.currentTarget.value;
-							pickMaterial(item);
-						}}
-						class="rounded border px-2 py-2 sm:col-span-3"
-					>
-						<option value="">— pilih material —</option>
-						{#each data.materials as m (m.id)}
-							<option value={m.id}>{m.name} ({m.unit})</option>
-						{/each}
-					</select>
-				{:else}
-					<input bind:value={item.description} placeholder="Deskripsi (mis. Kaca riben 5mm)"
-						class="rounded border px-2 py-2 sm:col-span-2" />
-					<input bind:value={item.unit} placeholder="Satuan" class="rounded border px-2 py-2" />
-				{/if}
+						{#if item.mode === 'catalog'}
+							<select
+								value={item.materialId}
+								onchange={(e) => {
+									item.materialId = e.currentTarget.value;
+									pickMaterial(item);
+								}}
+								class="field sm:col-span-3"
+							>
+								<option value="">— pilih material —</option>
+								{#each data.materials as m (m.id)}
+									<option value={m.id}>{m.name} ({m.unit})</option>
+								{/each}
+							</select>
+						{:else}
+							<input bind:value={item.description} placeholder="Deskripsi (mis. Kaca riben 5mm)"
+								class="field sm:col-span-2" />
+							<input bind:value={item.unit} placeholder="Satuan" class="field" />
+						{/if}
 
-				<input type="number" min="0.001" step="0.001" bind:value={item.quantity}
-					placeholder="Jumlah" class="rounded border px-2 py-2" />
-								<MoneyInput bind:value={item.unitPrice} placeholder="Harga satuan" />
+						<input type="number" min="0.001" step="0.001" bind:value={item.quantity}
+							placeholder="Jumlah" class="field" />
+						<MoneyInput bind:value={item.unitPrice} placeholder="Harga satuan" />
 
-				<div class="flex items-center justify-between sm:col-span-6">
-					<span class="text-sm text-gray-600">
-						{item.description || 'Item belum dipilih'} · Subtotal:
-						<strong>{rupiah(subtotal(item))}</strong>
-					</span>
-					{#if items.length > 1}
-						<button type="button" onclick={() => removeItem(idx)}
-							class="rounded border border-red-400 px-3 py-1 text-sm text-red-600">
-							Hapus item
-						</button>
-					{/if}
-				</div>
+						<div class="flex items-center justify-between sm:col-span-6">
+							<span class="text-sm text-gray-600">
+								{item.description || 'Item belum dipilih'} · Subtotal:
+								<strong class="text-brand-800">{rupiah(subtotal(item))}</strong>
+							</span>
+							{#if items.length > 1}
+								<button type="button" onclick={() => removeItem(idx)} class="btn-danger">Hapus item</button>
+							{/if}
+						</div>
+					</div>
+				{/each}
 			</div>
-		{/each}
 
-		<div class="flex gap-2">
-			<button type="button" onclick={() => addItem('catalog')}
-				class="rounded border px-3 py-2 text-sm">+ Item dari katalog</button>
-			<button type="button" onclick={() => addItem('free')}
-				class="rounded border px-3 py-2 text-sm">+ Item bebas</button>
-		</div>
+			<div class="mt-3 flex flex-wrap gap-2">
+				<button type="button" onclick={() => addItem('catalog')} class="btn-outline">+ Item dari katalog</button>
+				<button type="button" onclick={() => addItem('free')} class="btn-outline">+ Item bebas</button>
+			</div>
+		</section>
 
-		<!-- Biaya lain -->
-		<h2 class="mt-2 text-lg font-semibold">Biaya di luar bahan</h2>
-		<div class="grid gap-3 sm:grid-cols-3">
-			<label class="flex flex-col text-sm">
-				Upah tukang (Rp)
-				<input name="laborCost" type="number" min="0" step="1000" bind:value={laborCost}
-					class="rounded border px-3 py-2" />
+		<!-- Biaya di luar bahan dan harga tawar -->
+		<section class="card grid gap-4">
+			<h2 class="text-lg font-semibold text-brand-900">Biaya di luar bahan</h2>
+			<div class="grid gap-3 sm:grid-cols-3">
+				<label class="flex flex-col gap-1 text-sm">
+					Upah tukang
+					<MoneyInput name="laborCost" bind:value={laborCost} />
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					Ongkir
+					<MoneyInput name="deliveryCost" bind:value={deliveryCost} />
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					Biaya lain
+					<MoneyInput name="otherCost" bind:value={otherCost} />
+				</label>
+			</div>
+
+			<label class="flex flex-col gap-1 text-sm">
+				Harga yang ditawarkan ke pelanggan
+				<MoneyInput name="offeredPrice" bind:value={offeredPrice} class="max-w-xs" />
 			</label>
-			<label class="flex flex-col text-sm">
-				Ongkir (Rp)
-				<input name="deliveryCost" type="number" min="0" step="1000" bind:value={deliveryCost}
-					class="rounded border px-3 py-2" />
-			</label>
-			<label class="flex flex-col text-sm">
-				Biaya lain (Rp)
-				<input name="otherCost" type="number" min="0" step="1000" bind:value={otherCost}
-					class="rounded border px-3 py-2" />
-			</label>
-		</div>
 
-		<label class="flex flex-col text-sm">
-			Harga yang ditawarkan ke pelanggan (Rp)
-			<input name="offeredPrice" type="number" min="0" step="1000" bind:value={offeredPrice}
-				class="max-w-xs rounded border px-3 py-2" />
-		</label>
-
-		<label class="flex flex-col text-sm">
-			Catatan (opsional)
-			<textarea name="notes" rows="2" bind:value={notes} class="rounded border px-3 py-2"></textarea>
-		</label>
+			<label class="flex flex-col gap-1 text-sm">
+				Catatan (opsional)
+				<textarea name="notes" rows="2" bind:value={notes} class="field"></textarea>
+			</label>
+		</section>
 
 		<!-- Perkiraan langsung -->
-		<div class="rounded border bg-gray-50 p-4">
-			<p>Total modal (perkiraan): <strong>{rupiah(totalCost)}</strong></p>
+		<section class="rounded-2xl bg-brand-50 p-4">
+			<p>Total modal (perkiraan): <strong class="text-brand-800">{rupiah(totalCost)}</strong></p>
 			{#if Number(offeredPrice) > 0}
 				<p class={profit < 0 ? 'text-red-600' : 'text-green-700'}>
 					Untung di harga tawar: <strong>{rupiah(profit)}</strong> (margin {margin.toFixed(1)}%)
 				</p>
 			{/if}
-		</div>
+		</section>
 
-		<button
-			disabled={submitting}
-			class="rounded bg-brand-500 px-4 py-3 font-semibold text-white disabled:opacity-50"
-		>
+		<button disabled={submitting} class="btn py-3">
 			{submitting ? 'Menyimpan...' : 'Simpan perubahan'}
 		</button>
 	</form>
