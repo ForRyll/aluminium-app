@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 // Kalau sudah login, tidak perlu melihat halaman login lagi
 export const load: PageServerLoad = async ({ locals }) => {
-    if (locals.token) redirect(303, '/orders');
+    if (locals.token) redirect(303, '/');
 };
 
 export const actions: Actions = {
@@ -36,6 +36,7 @@ export const actions: Actions = {
             maxAge: 60 * 60 * 12
         });
 
-        redirect(303, '/orders');
+        redirect(303, '/');
     }
 };
+

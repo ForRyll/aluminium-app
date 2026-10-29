@@ -65,3 +65,37 @@ export interface OrderSummary {
 		status: 'rugi' | 'tipis' | 'aman';
 	} | null;
 }
+
+// Data dari /dashboard
+export interface DashboardOrderRef {
+	id: string;
+	orderNumber: string;
+	title: string;
+	customerName: string;
+	status: string;
+}
+
+export interface DashboardData {
+	cards: {
+		incomeThisMonth: number;
+		outstanding: number;
+		activeOrders: number;
+		pendingOrders: number;
+	};
+	thisMonth: string;
+	incomeByMonth: { month: string; total: number }[];
+	lowMargin: {
+		count: number;
+		items: (DashboardOrderRef & {
+			price: number;
+			profit: number;
+			marginPercent: number;
+			level: 'rugi' | 'tipis';
+		})[];
+	};
+	unpaid: {
+		count: number;
+		items: (DashboardOrderRef & { agreedPrice: number; remaining: number })[];
+	};
+	recent: (DashboardOrderRef & { offeredPrice: number | null })[];
+}
