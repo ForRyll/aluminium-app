@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { rupiah } from '../../../../lib/api';
+	import MoneyInput from '../../../../lib/components/MoneyInput.svelte';
 
 	let { data, form } = $props();
 
@@ -117,8 +118,7 @@
 
 				<input type="number" min="0.001" step="0.001" bind:value={item.quantity}
 					placeholder="Jumlah" class="rounded border px-2 py-2" />
-				<input type="number" min="0" step="0.01" bind:value={item.unitPrice}
-					placeholder="Harga satuan" class="rounded border px-2 py-2" />
+								<MoneyInput bind:value={item.unitPrice} placeholder="Harga satuan" />
 
 				<div class="flex items-center justify-between sm:col-span-6">
 					<span class="text-sm text-gray-600">

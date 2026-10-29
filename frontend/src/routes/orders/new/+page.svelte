@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { rupiah } from '../../../lib/api';
+	import MoneyInput from '../../../lib/components/MoneyInput.svelte';
 
 	let { data, form } = $props();
 
@@ -123,8 +124,7 @@
 						placeholder="Jumlah" class="rounded border px-2 py-2" />
 
 					{#if item.mode === 'free'}
-						<input type="number" min="0" step="0.01" bind:value={item.unitPrice}
-							placeholder="Harga satuan" class="rounded border px-2 py-2 sm:col-span-2" />
+						<MoneyInput bind:value={item.unitPrice} placeholder="Harga satuan" class="sm:col-span-2" />
 					{/if}
 
 					<div class="flex items-center justify-between sm:col-span-6">
@@ -150,26 +150,22 @@
 			<h2 class="mt-2 text-lg font-semibold">Biaya di luar bahan</h2>
 			<div class="grid gap-3 sm:grid-cols-3">
 				<label class="flex flex-col text-sm">
-					Upah tukang (Rp)
-					<input name="laborCost" type="number" min="0" step="1000" bind:value={laborCost}
-						class="rounded border px-3 py-2" />
+					Upah tukang
+					<MoneyInput name="laborCost" bind:value={laborCost} />
 				</label>
 				<label class="flex flex-col text-sm">
-					Ongkir (Rp)
-					<input name="deliveryCost" type="number" min="0" step="1000" bind:value={deliveryCost}
-						class="rounded border px-3 py-2" />
+					Ongkir
+					<MoneyInput name="deliveryCost" bind:value={deliveryCost} />
 				</label>
 				<label class="flex flex-col text-sm">
-					Biaya lain (Rp)
-					<input name="otherCost" type="number" min="0" step="1000" bind:value={otherCost}
-						class="rounded border px-3 py-2" />
+					Biaya lain
+					<MoneyInput name="otherCost" bind:value={otherCost} />
 				</label>
 			</div>
 
 			<label class="flex flex-col text-sm">
-				Harga yang ditawarkan ke pelanggan (Rp)
-				<input name="offeredPrice" type="number" min="0" step="1000" bind:value={offeredPrice}
-					class="max-w-xs rounded border px-3 py-2" />
+				Harga yang ditawarkan ke pelanggan
+				<MoneyInput name="offeredPrice" bind:value={offeredPrice} class="max-w-xs" />
 			</label>
 
 			<label class="flex flex-col text-sm">
@@ -189,7 +185,7 @@
 
 			<button
 				disabled={submitting}
-				class="rounded bg-brand-500 px-4 py-3 font-semibold text-white disabled:opacity-50"
+				class="rounded bg-brand-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
 			>
 				{submitting ? 'Menyimpan...' : 'Simpan order'}
 			</button>

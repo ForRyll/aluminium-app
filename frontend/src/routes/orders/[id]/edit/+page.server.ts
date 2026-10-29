@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+﻿import { error, fail, redirect } from '@sveltejs/kit';
 import { API_URL, type Material, type Order, type OrderItem } from '../../../../lib/api';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -103,7 +103,7 @@ export const actions: Actions = {
 			laborCost: num(form.get('laborCost')),
 			deliveryCost: num(form.get('deliveryCost')),
 			otherCost: num(form.get('otherCost')),
-			offeredPrice: num(form.get('offeredPrice')),
+			offeredPrice: num(form.get('offeredPrice')) || undefined,
 			notes: String(form.get('notes') ?? '').trim()
 		};
 
