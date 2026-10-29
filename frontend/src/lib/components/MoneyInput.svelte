@@ -64,7 +64,7 @@
 		{required}
 		value={text}
 		oninput={onInput}
-		class="w-full rounded border py-2 pr-3 pl-9 text-right"
+		class="field pl-9 text-right"
 	/>
 	<!-- Nilai asli (angka polos) yang dikirim ke server -->
 	{#if name}

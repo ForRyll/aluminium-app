@@ -13,3 +13,52 @@
 	--color-brand-800: #174a77;
 	--color-brand-900: #123c5e;
 }
+
+/* Gaya bersama untuk seluruh aplikasi */
+@layer components {
+	/* Kartu putih bersudut bulat */
+	.card {
+		@apply rounded-2xl border border-brand-100 bg-white p-4 shadow-sm;
+	}
+
+	/* Tombol utama berbentuk pil */
+	.btn {
+		@apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 px-5 py-2 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50;
+	}
+
+	/* Tombol sekunder (garis biru) */
+	.btn-outline {
+		@apply inline-flex items-center justify-center rounded-full border border-brand-600 px-4 py-1.5 text-sm font-semibold text-brand-600 transition hover:bg-brand-50;
+	}
+
+	/* Tombol berbahaya (hapus, nonaktifkan) */
+	.btn-danger {
+		@apply inline-flex items-center justify-center rounded-full border border-red-400 px-4 py-1.5 text-sm text-red-600 transition hover:bg-red-50;
+	}
+
+	/* Kolom isian */
+	.field {
+		@apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none;
+	}
+
+	/* Tabel */
+	.tbl {
+		@apply w-full border-collapse text-left;
+	}
+	.tbl thead tr {
+		@apply bg-brand-50 text-brand-800;
+	}
+	.tbl th {
+		@apply p-3 text-sm font-semibold;
+	}
+	.tbl td {
+		@apply p-3;
+	}
+	.tbl tbody tr {
+		@apply border-b border-gray-100 hover:bg-brand-50;
+	}
+
+	.page-title {
+		@apply text-2xl font-bold text-brand-900;
+	}
+}
