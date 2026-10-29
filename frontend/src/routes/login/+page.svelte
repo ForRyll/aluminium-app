@@ -38,7 +38,7 @@
         </label>
         <button
             disabled={submitting}
-            class="rounded bg-orange-500 px-4 py-2 font-semibold text-white disabled:opacity-50"
+            class="rounded bg-brand-500 px-4 py-2 font-semibold text-white disabled:opacity-50"
         >
             {submitting ? 'Masuk...' : 'Masuk'}
         </button>

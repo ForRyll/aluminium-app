@@ -8,7 +8,7 @@
 </script>
 
 <main class="mx-auto max-w-2xl p-6">
-	<a href="/customers" class="text-sm text-orange-600 underline">← Semua pelanggan</a>
+	<a href="/customers" class="text-sm text-brand-600 underline">← Semua pelanggan</a>
 	<h1 class="mt-2 mb-4 text-2xl font-bold">Ubah pelanggan</h1>
 
 	{#if form?.messages}
@@ -52,7 +52,7 @@
 		</label>
 		<button
 			disabled={submitting}
-			class="rounded bg-orange-500 px-4 py-2 font-semibold text-white disabled:opacity-50"
+			class="rounded bg-brand-500 px-4 py-2 font-semibold text-white disabled:opacity-50"
 		>
 			{submitting ? 'Menyimpan...' : 'Simpan perubahan'}
 		</button>

@@ -56,7 +56,7 @@
 </script>
 
 <main class="mx-auto max-w-4xl p-6">
-	<a href="/orders/{data.orderId}" class="text-sm text-orange-600 underline">← Kembali ke order</a>
+	<a href="/orders/{data.orderId}" class="text-sm text-brand-600 underline">← Kembali ke order</a>
 	<h1 class="mt-2 text-2xl font-bold">Ubah order {data.orderNumber}</h1>
 	<p class="mb-4 text-gray-600">Pelanggan: {data.customerName} (tidak bisa diganti)</p>
 
@@ -185,7 +185,7 @@
 
 		<button
 			disabled={submitting}
-			class="rounded bg-orange-500 px-4 py-3 font-semibold text-white disabled:opacity-50"
+			class="rounded bg-brand-500 px-4 py-3 font-semibold text-white disabled:opacity-50"
 		>
 			{submitting ? 'Menyimpan...' : 'Simpan perubahan'}
 		</button>

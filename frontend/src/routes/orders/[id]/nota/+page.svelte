@@ -21,9 +21,9 @@
 <main class="nota mx-auto max-w-2xl p-8">
 	<!-- Tombol ini tidak ikut tercetak -->
 	<div class="no-print mb-6 flex items-center justify-between">
-		<a href="/orders/{data.order.id}" class="text-sm text-orange-600 underline">← Kembali</a>
+		<a href="/orders/{data.order.id}" class="text-sm text-brand-600 underline">← Kembali</a>
 		<button onclick={() => window.print()}
-			class="rounded bg-orange-500 px-4 py-2 font-semibold text-white">
+			class="rounded bg-brand-500 px-4 py-2 font-semibold text-white">
 			Cetak / Simpan PDF
 		</button>
 	</div>

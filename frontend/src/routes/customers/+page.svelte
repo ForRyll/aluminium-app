@@ -47,7 +47,7 @@
 				value={form?.values?.notes ?? ''} class="rounded border px-3 py-2 sm:col-span-2" />
 			<button
 				disabled={submitting}
-				class="rounded bg-orange-500 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2"
+				class="rounded bg-brand-500 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2"
 			>
 				{submitting ? 'Menyimpan...' : 'Simpan pelanggan'}
 			</button>
@@ -58,7 +58,7 @@
 	<form method="GET" class="mb-4 flex gap-2">
 		<input name="search" value={data.search} placeholder="Cari nama atau nomor HP..."
 			class="w-full rounded border px-3 py-2" />
-		<button class="rounded bg-orange-500 px-4 py-2 font-semibold text-white">Cari</button>
+		<button class="rounded bg-brand-500 px-4 py-2 font-semibold text-white">Cari</button>
 	</form>
 
 	{#if data.error}
@@ -80,7 +80,7 @@
 					{#each data.customers as c (c.id)}
 						<tr class="border-b">
 							<td class="p-2 font-medium">
-								<a href="/customers/{c.id}" class="text-orange-600 underline">{c.name}</a>
+								<a href="/customers/{c.id}" class="text-brand-600 underline">{c.name}</a>
 							</td><td class="p-2 font-medium">{c.name}</td>
 							<td class="p-2">{c.phone ?? '-'}</td>
 							<td class="p-2">{c.address ?? '-'}</td>

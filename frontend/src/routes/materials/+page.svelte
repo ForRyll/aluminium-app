@@ -78,7 +78,7 @@
         class="rounded border px-3 py-2"
       />
       <button
-        class="rounded bg-orange-500 px-4 py-2 font-semibold text-white sm:col-span-2"
+        class="rounded bg-brand-500 px-4 py-2 font-semibold text-white sm:col-span-2"
       >
         Simpan material
       </button>
@@ -93,7 +93,7 @@
       placeholder="Cari nama material..."
       class="w-full rounded border px-3 py-2"
     />
-    <button class="rounded bg-orange-500 px-4 py-2 font-semibold text-white"
+    <button class="rounded bg-brand-500 px-4 py-2 font-semibold text-white"
       >Cari</button
     >
   </form>
@@ -136,7 +136,7 @@
                     class="w-40"
                   />
                   <button
-                    class="rounded bg-orange-500 px-3 py-1 text-sm font-semibold text-white"
+                    class="rounded bg-brand-500 px-3 py-1 text-sm font-semibold text-white"
                   >
                     Simpan
                   </button>

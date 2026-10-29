@@ -39,12 +39,12 @@
 
 <main class="mx-auto max-w-4xl p-6">
 		<div class="flex items-center justify-between">
-		<a href="/orders" class="text-sm text-orange-600 underline">← Semua order</a>
+		<a href="/orders" class="text-sm text-brand-600 underline">← Semua order</a>
 		<div class="flex gap-2">
 			{#if data.order.status === 'draft' || data.order.status === 'penawaran'}
 				<a
 					href="/orders/{data.order.id}/edit"
-					class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
+					class="rounded border border-brand-500 px-3 py-1 text-sm font-semibold text-brand-600"
 				>
 					Ubah order
 				</a>
@@ -52,14 +52,14 @@
 			{#if ['deal', 'dikerjakan', 'selesai'].includes(data.order.status)}
 				<a
 					href="/orders/{data.order.id}/pembayaran"
-					class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
+					class="rounded border border-brand-500 px-3 py-1 text-sm font-semibold text-brand-600"
 				>
 					Pembayaran
 				</a>
 			{/if}
 			<a
 				href="/orders/{data.order.id}/nota"
-				class="rounded border border-orange-500 px-3 py-1 text-sm font-semibold text-orange-600"
+				class="rounded border border-brand-500 px-3 py-1 text-sm font-semibold text-brand-600"
 			>
 				Cetak nota
 			</a>
@@ -119,7 +119,7 @@
 							disabled={submitting}
 							class="rounded px-4 py-2 font-semibold disabled:opacity-50 {s === 'batal'
 								? 'border border-red-400 text-red-600'
-								: 'bg-orange-500 text-white'}"
+								: 'bg-brand-500 text-white'}"
 						>
 							{label[s]}
 						</button>
@@ -178,7 +178,7 @@
 			<input name="targetMargin" type="number" min="0" max="99" step="1"
 				value={data.targetMargin} placeholder="15" class="w-28 rounded border px-3 py-2" />
 		</label>
-		<button class="rounded bg-orange-500 px-4 py-2 font-semibold text-white">Hitung</button>
+		<button class="rounded bg-brand-500 px-4 py-2 font-semibold text-white">Hitung</button>
 	</form>
 
 	{#if ev}

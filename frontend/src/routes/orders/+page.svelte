@@ -7,7 +7,7 @@
 	const badge: Record<string, string> = {
 		draft: 'bg-gray-200 text-gray-700',
 		penawaran: 'bg-blue-100 text-blue-700',
-		deal: 'bg-orange-100 text-orange-700',
+		deal: 'bg-brand-100 text-brand-700',
 		dikerjakan: 'bg-purple-100 text-purple-700',
 		selesai: 'bg-green-100 text-green-700',
 		batal: 'bg-red-100 text-red-700'
@@ -17,7 +17,7 @@
 <main class="mx-auto max-w-5xl p-6">
 		<div class="mb-4 flex items-center justify-between">
 		<h1 class="text-2xl font-bold">Order</h1>
-		<a href="/orders/new" class="rounded bg-orange-500 px-4 py-2 font-semibold text-white">
+		<a href="/orders/new" class="rounded bg-brand-500 px-4 py-2 font-semibold text-white">
 			+ Buat order baru
 		</a>
 	</div>
@@ -42,7 +42,7 @@
 					{#each data.orders as o (o.id)}
 						<tr class="border-b">
 							<td class="p-2">
-								<a href="/orders/{o.id}" class="font-medium text-orange-600 underline">
+								<a href="/orders/{o.id}" class="font-medium text-brand-600 underline">
 									{o.orderNumber}
 								</a>
 							</td>

@@ -18,7 +18,7 @@
 </script>
 
 <main class="mx-auto max-w-3xl p-6">
-	<a href="/orders/{data.orderId}" class="text-sm text-orange-600 underline">← Kembali ke order</a>
+	<a href="/orders/{data.orderId}" class="text-sm text-brand-600 underline">← Kembali ke order</a>
 	<h1 class="mt-2 mb-1 text-2xl font-bold">Pembayaran {info.orderNumber}</h1>
 	<p class="mb-4 text-gray-600">Status order: <strong>{info.status}</strong></p>
 
@@ -89,7 +89,7 @@
 			</label>
 			<button
 				disabled={submitting}
-				class="rounded bg-orange-500 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2"
+				class="rounded bg-brand-500 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2"
 			>
 				{submitting ? 'Menyimpan...' : 'Simpan pembayaran'}
 			</button>

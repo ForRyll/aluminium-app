@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+
+/* Palet merek Nazril Aluminium (diambil dari logo) */
+@theme {
+	--color-brand-50: #eaf6ff;
+	--color-brand-100: #d4ecfd;
+	--color-brand-200: #a9d8fa;
+	--color-brand-300: #6fbef5;
+	--color-brand-400: #3aa7f0;
+	--color-brand-500: #1f8fe0;
+	--color-brand-600: #1a74bd;
+	--color-brand-700: #1b5b93;
+	--color-brand-800: #174a77;
+	--color-brand-900: #123c5e;
+}
