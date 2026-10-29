@@ -7,28 +7,31 @@
 	let submitting = $state(false);
 </script>
 
-<main class="mx-auto max-w-5xl p-6">
-	<h1 class="mb-4 text-2xl font-bold">Pelanggan</h1>
+<main class="mx-auto max-w-5xl p-4 md:p-6">
+	<div class="mb-4">
+		<h1 class="page-title">Pelanggan</h1>
+		<p class="text-gray-500">Klik nama pelanggan untuk mengubah datanya.</p>
+	</div>
 
 	{#if form?.messages}
-		<ul class="mb-4 rounded bg-red-100 p-3 text-red-700">
+		<ul class="mb-4 rounded-lg bg-red-100 p-3 text-red-700">
 			{#each form.messages as m}
 				<li>{m}</li>
 			{/each}
 		</ul>
 	{/if}
 	{#if form?.success}
-		<p class="mb-4 rounded bg-green-100 p-3 text-green-700">{form.message}</p>
+		<p class="mb-4 rounded-lg bg-green-100 p-3 text-green-700">{form.message}</p>
 	{/if}
 
 	<!-- Form tambah pelanggan -->
-	<details class="mb-6 rounded border p-4" open={!!form?.values}>
-		<summary class="cursor-pointer font-semibold">+ Tambah pelanggan</summary>
+	<details class="card mb-4" open={!!form?.values}>
+		<summary class="cursor-pointer font-semibold text-brand-700">+ Tambah pelanggan</summary>
 
 		<form
 			method="POST"
 			action="?/create"
-			class="mt-3 grid gap-3 sm:grid-cols-2"
+			class="mt-4 grid gap-3 sm:grid-cols-2"
 			use:enhance={() => {
 				submitting = true;
 				return async ({ update }) => {
@@ -38,17 +41,14 @@
 			}}
 		>
 			<input name="name" placeholder="Nama pelanggan" required
-				value={form?.values?.name ?? ''} class="rounded border px-3 py-2" />
+				value={form?.values?.name ?? ''} class="field" />
 			<input name="phone" placeholder="No. HP (mis. 0812-3456-7890)"
-				value={form?.values?.phone ?? ''} class="rounded border px-3 py-2" />
+				value={form?.values?.phone ?? ''} class="field" />
 			<input name="address" placeholder="Alamat pengerjaan (opsional)"
-				value={form?.values?.address ?? ''} class="rounded border px-3 py-2 sm:col-span-2" />
+				value={form?.values?.address ?? ''} class="field sm:col-span-2" />
 			<input name="notes" placeholder="Catatan (mis. langganan, minta kaca riben)"
-				value={form?.values?.notes ?? ''} class="rounded border px-3 py-2 sm:col-span-2" />
-			<button
-				disabled={submitting}
-				class="rounded bg-brand-500 px-4 py-2 font-semibold text-white disabled:opacity-50 sm:col-span-2"
-			>
+				value={form?.values?.notes ?? ''} class="field sm:col-span-2" />
+			<button disabled={submitting} class="btn sm:col-span-2">
 				{submitting ? 'Menyimpan...' : 'Simpan pelanggan'}
 			</button>
 		</form>
@@ -56,35 +56,34 @@
 
 	<!-- Pencarian: nama atau nomor HP -->
 	<form method="GET" class="mb-4 flex gap-2">
-		<input name="search" value={data.search} placeholder="Cari nama atau nomor HP..."
-			class="w-full rounded border px-3 py-2" />
-		<button class="rounded bg-brand-500 px-4 py-2 font-semibold text-white">Cari</button>
+		<input name="search" value={data.search} placeholder="Cari nama atau nomor HP..." class="field" />
+		<button class="btn">Cari</button>
 	</form>
 
 	{#if data.error}
-		<p class="rounded bg-red-100 p-3 text-red-700">Gagal memuat data: {data.error}</p>
+		<p class="rounded-lg bg-red-100 p-3 text-red-700">Gagal memuat data: {data.error}</p>
 	{:else if data.customers.length === 0}
-		<p class="text-gray-500">Belum ada pelanggan.</p>
+		<p class="card text-gray-500">Belum ada pelanggan.</p>
 	{:else}
-		<div class="overflow-x-auto">
-			<table class="w-full border-collapse text-left">
+		<div class="card overflow-x-auto p-0">
+			<table class="tbl">
 				<thead>
-					<tr class="border-b bg-gray-100">
-						<th class="p-2">Nama</th>
-						<th class="p-2">No. HP</th>
-						<th class="p-2">Alamat</th>
-						<th class="p-2">Catatan</th>
+					<tr>
+						<th>Nama</th>
+						<th>No. HP</th>
+						<th>Alamat</th>
+						<th>Catatan</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each data.customers as c (c.id)}
-						<tr class="border-b">
-							<td class="p-2 font-medium">
+						<tr>
+							<td class="font-medium">
 								<a href="/customers/{c.id}" class="text-brand-600 underline">{c.name}</a>
-							</td><td class="p-2 font-medium">{c.name}</td>
-							<td class="p-2">{c.phone ?? '-'}</td>
-							<td class="p-2">{c.address ?? '-'}</td>
-							<td class="p-2">{c.notes ?? '-'}</td>
+							</td>
+							<td>{c.phone ?? '-'}</td>
+							<td>{c.address ?? '-'}</td>
+							<td>{c.notes ?? '-'}</td>
 						</tr>
 					{/each}
 				</tbody>
