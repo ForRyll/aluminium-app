@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { rupiah } from '../../../../lib/api';
+	import { waLink } from '../../../../lib/whatsapp';
 	import MoneyInput from '../../../../lib/components/MoneyInput.svelte';
 
 	let { data, form } = $props();
+
+	// Nama usaha di awal pesan WhatsApp. Ubah sesuai kebutuhan.
+	const usaha = 'Nazril Aluminium';
 
 	// true selama form dikirim, mencegah kiriman ganda
 	let submitting = $state(false);
@@ -24,6 +28,20 @@
 
 	let info = $derived(data.info);
 	let lunas = $derived(info.remaining !== null && info.remaining <= 0);
+
+	// Pesan pengingat tagihan, hanya dibuat kalau masih ada sisa
+	let waHref = $derived.by(() => {
+		if (info.remaining === null || info.remaining <= 0 || info.agreedPrice === null) return null;
+		const sapaan = data.customerName ? `Halo ${data.customerName}` : 'Halo';
+		const pesan =
+			`${sapaan}, kami dari ${usaha}.\n` +
+			`Mengingatkan pembayaran untuk pekerjaan "${data.title}" (${info.orderNumber}).\n\n` +
+			`Total: ${rupiah(info.agreedPrice)}\n` +
+			`Sudah dibayar: ${rupiah(info.totalPaid)}\n` +
+			`Sisa tagihan: ${rupiah(info.remaining)}\n\n` +
+			`Terima kasih.`;
+		return waLink(data.customerPhone, pesan);
+	});
 
 	const tanggal = (d: string) =>
 		new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -64,6 +82,20 @@
 			<p class="mt-3 rounded-lg border border-green-300 bg-green-100 p-3 text-center font-bold text-green-700">
 				LUNAS
 			</p>
+		{:else if info.remaining !== null && info.remaining > 0}
+			<!-- Pengingat tagihan lewat WhatsApp -->
+			<div class="mt-3 border-t pt-3">
+				{#if waHref}
+					<a href={waHref} target="_blank" rel="noopener" class="btn">Kirim pengingat lewat WhatsApp</a>
+					<p class="mt-1 text-sm text-gray-500">
+						WhatsApp terbuka dengan pesan siap kirim ke {data.customerName || 'pelanggan'}. Kamu tinggal menekan kirim.
+					</p>
+				{:else}
+					<p class="text-sm text-gray-500">
+						Nomor HP pelanggan belum valid, jadi tombol WhatsApp belum bisa dipakai. Perbaiki di menu Pelanggan.
+					</p>
+				{/if}
+			</div>
 		{/if}
 	</section>
 

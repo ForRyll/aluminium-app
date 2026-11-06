@@ -1,5 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
-import { API_URL } from '../../../../lib/api';
+import { API_URL, type Order } from '../../../../lib/api';
 import type { Actions, PageServerLoad } from './$types';
 
 interface Payment {
@@ -19,12 +19,25 @@ interface PaymentInfo {
 	payments: Payment[];
 }
 
-// Dijalankan di server: ambil daftar pembayaran beserta sisa tagihan
+// Dijalankan di server: ambil pembayaran, plus data order untuk pengingat WhatsApp
 export const load: PageServerLoad = async ({ fetch, params }) => {
-	const res = await fetch(`${API_URL}/orders/${params.id}/payments`);
-	if (res.status === 404) error(404, 'Order tidak ditemukan');
-	if (!res.ok) error(502, 'Backend tidak bisa dihubungi');
-	return { orderId: params.id, info: (await res.json()) as PaymentInfo };
+	const [payRes, orderRes] = await Promise.all([
+		fetch(`${API_URL}/orders/${params.id}/payments`),
+		fetch(`${API_URL}/orders/${params.id}`)
+	]);
+
+	if (payRes.status === 404 || orderRes.status === 404) error(404, 'Order tidak ditemukan');
+	if (!payRes.ok || !orderRes.ok) error(502, 'Backend tidak bisa dihubungi');
+
+	const order = (await orderRes.json()) as Order;
+
+	return {
+		orderId: params.id,
+		info: (await payRes.json()) as PaymentInfo,
+		title: order.title,
+		customerName: order.customer?.name ?? '',
+		customerPhone: order.customer?.phone ?? null
+	};
 };
 
 // Ambil daftar pesan error dari balasan backend
