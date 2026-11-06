@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ExportModule } from './export/export.module';
 import { MaterialsModule } from './materials/materials.module';
 import { OrdersModule } from './orders/orders.module';
 
@@ -36,6 +37,7 @@ import { OrdersModule } from './orders/orders.module';
     OrdersModule,
     AuthModule,
     DashboardModule,
+    ExportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
