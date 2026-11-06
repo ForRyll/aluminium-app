@@ -44,8 +44,10 @@
 	let ev = $derived(data.summary.evaluation);
 	let next = $derived(transitions[data.order.status] ?? []);
 
-	// Harga kesepakatan (dipakai saat status jadi deal) dan harga untuk simulasi
+	// Nilai awal diambil dari data saat halaman dibuka (disengaja)
+	// svelte-ignore state_referenced_locally
 	let finalPrice = $state(Number(data.order.offeredPrice) || 0);
+	// svelte-ignore state_referenced_locally
 	let simPrice = $state(Number(data.price) || 0);
 
 	// true selama form dikirim, mencegah kiriman ganda
@@ -62,6 +64,7 @@
 			{#if ['deal', 'dikerjakan', 'selesai'].includes(data.order.status)}
 				<a href="/orders/{data.order.id}/pembayaran" class="btn-outline">Pembayaran</a>
 			{/if}
+			<a href="/orders/{data.order.id}/foto" class="btn-outline">Foto</a>
 			<a href="/orders/{data.order.id}/nota" class="btn-outline">Cetak nota</a>
 		</div>
 	</div>
