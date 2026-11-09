@@ -8,6 +8,11 @@
 	// Ikon dibuat dari path SVG sederhana, tanpa library tambahan
 	const menu = [
 		{
+			href: '/',
+			label: 'Beranda',
+			icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
+		},
+		{
 			href: '/orders',
 			label: 'Order',
 			icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'
@@ -22,19 +27,22 @@
 			label: 'Material',
 			icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
 		},
-        {
-			href: '/',
-			label: 'Beranda',
-			icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
-		},
+		{
+			href: '/export',
+			label: 'Ekspor',
+			icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4'
+		}
 	];
 
 	const logoutIcon =
 		'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1';
 
 	// Menu aktif: alamat yang sama, atau halaman di bawahnya (mis. /orders/123)
+	// Khusus Beranda ('/'), hanya aktif kalau tepat di '/'
 	const isActive = (href: string) =>
-		page.url.pathname === href || page.url.pathname.startsWith(href + '/');
+		href === '/'
+			? page.url.pathname === '/'
+			: page.url.pathname === href || page.url.pathname.startsWith(href + '/');
 
 	// Status buka-tutup menu di HP
 	let open = $state(false);
@@ -44,6 +52,11 @@
 		void page.url.pathname;
 		open = false;
 	});
+
+	// Pengingat backup: belum pernah, atau sudah 7 hari lebih. Disembunyikan di halaman Ekspor sendiri.
+	let showBackupReminder = $derived(
+		(data.backupDays === null || data.backupDays >= 7) && !page.url.pathname.startsWith('/export')
+	);
 </script>
 
 <svelte:head>
@@ -144,6 +157,18 @@
 
 		<!-- Kartu konten -->
 		<div class="min-w-0 flex-1 bg-white md:rounded-3xl print:rounded-none">
+			{#if showBackupReminder}
+				<div
+					class="flex flex-wrap items-center justify-between gap-2 bg-amber-100 px-4 py-2 text-sm text-amber-800 md:rounded-t-3xl print:hidden"
+				>
+					<span>
+						{data.backupDays === null
+							? 'Data belum pernah di-backup dari browser ini.'
+							: `Backup terakhir ${data.backupDays} hari lalu.`}
+					</span>
+					<a href="/export" class="font-semibold underline">Backup sekarang</a>
+				</div>
+			{/if}
 			{@render children()}
 		</div>
 	</div>
