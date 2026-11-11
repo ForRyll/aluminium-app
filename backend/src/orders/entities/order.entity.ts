@@ -58,6 +58,13 @@ export class Order {
   @Column({ type: 'text', nullable: true })
   notes: string | null;
 
+  // Jadwal pengerjaan (format YYYY-MM-DD)
+  @Column({ type: 'date', nullable: true })
+  startDate: string | null;
+
+  @Column({ type: 'date', nullable: true })
+  dueDate: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

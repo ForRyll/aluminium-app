@@ -12,6 +12,8 @@ import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { PhotosController } from './photos.controller';
 import { PhotosService } from './photos.service';
+import { ScheduleController } from './schedule.controller';
+import { ScheduleService } from './schedule.service';
 
 @Module({
   imports: [
@@ -24,7 +26,12 @@ import { PhotosService } from './photos.service';
       OrderPhoto,
     ]),
   ],
-  controllers: [OrdersController, PaymentsController, PhotosController],
-  providers: [OrdersService, PaymentsService, PhotosService],
+  controllers: [
+    OrdersController,
+    PaymentsController,
+    PhotosController,
+    ScheduleController,
+  ],
+  providers: [OrdersService, PaymentsService, PhotosService, ScheduleService],
 })
 export class OrdersModule {}
