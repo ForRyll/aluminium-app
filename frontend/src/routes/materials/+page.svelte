@@ -47,10 +47,10 @@
 				};
 			}}
 		>
-			<input name="name" placeholder="Nama (mis. Profil kusen 4 inci)" required class="field" />
+			<input name="name" placeholder="Nama (mis. Profil 4 in YKK 1,2 mm)" required class="field" />
 			<input name="category" placeholder="Kategori (profil, kaca, aksesoris)" required class="field" />
 			<input name="brand" placeholder="Merk (opsional)" class="field" />
-			<input name="unit" placeholder="Satuan (batang, m2, pcs)" required class="field" />
+			<input name="unit" placeholder="Satuan (meter, m2, pcs)" required class="field" />
 			<MoneyInput name="price" bind:value={newPrice} placeholder="Harga per satuan" required />
 			<input name="lengthPerUnit" type="number" min="0" step="0.01"
 				placeholder="Panjang 1 batang (meter, opsional)" class="field" />
@@ -61,8 +61,12 @@
 	</details>
 
 	<!-- Pencarian: kirim ?search=... ke halaman yang sama -->
-	<form method="GET" class="mb-4 flex gap-2">
-		<input name="search" value={data.search} placeholder="Cari nama material..." class="field" />
+	<form method="GET" class="mb-4 flex flex-wrap items-center gap-2">
+		<input name="search" value={data.search} placeholder="Cari nama material..." class="field flex-1" />
+		<label class="flex items-center gap-2 text-sm text-gray-600">
+			<input type="checkbox" name="nonaktif" value="1" checked={data.showInactive} />
+			Tampilkan yang nonaktif
+		</label>
 		<button class="btn">Cari</button>
 	</form>
 
@@ -85,10 +89,17 @@
 					</tr>
 				</thead>
 				<tbody>
-					<!-- Kunci memuat harga, supaya kolom "Harga baru" ikut kosong setelah disimpan -->
-					{#each data.materials as m (m.id + m.price)}
-						<tr>
-							<td class="font-medium">{m.name}</td>
+					<!-- Kunci memuat harga dan status, supaya kolom "Harga baru" ikut kosong setelah disimpan -->
+					{#each data.materials as m (m.id + m.price + m.isActive)}
+						<tr class={m.isActive ? '' : 'bg-gray-50 text-gray-400'}>
+							<td class="font-medium">
+								<a href="/materials/{m.id}" class="underline {m.isActive ? 'text-brand-600' : 'text-gray-500'}">
+									{m.name}
+								</a>
+								{#if !m.isActive}
+									<span class="ml-1 rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-600">nonaktif</span>
+								{/if}
+							</td>
 							<td>{m.category}</td>
 							<td>{m.brand ?? '-'}</td>
 							<td>{m.unit}</td>
@@ -101,16 +112,23 @@
 								</form>
 							</td>
 							<td>
-								<form
-									method="POST"
-									action="?/deactivate"
-									use:enhance={({ cancel }) => {
-										if (!confirm('Nonaktifkan material ini? Riwayat order lama tetap aman.')) cancel();
-									}}
-								>
-									<input type="hidden" name="id" value={m.id} />
-									<button class="btn-danger">Nonaktifkan</button>
-								</form>
+								{#if m.isActive}
+									<form
+										method="POST"
+										action="?/deactivate"
+										use:enhance={({ cancel }) => {
+											if (!confirm('Nonaktifkan material ini? Riwayat order lama tetap aman.')) cancel();
+										}}
+									>
+										<input type="hidden" name="id" value={m.id} />
+										<button class="btn-danger">Nonaktifkan</button>
+									</form>
+								{:else}
+									<form method="POST" action="?/activate" use:enhance>
+										<input type="hidden" name="id" value={m.id} />
+										<button class="btn-outline">Aktifkan</button>
+									</form>
+								{/if}
 							</td>
 						</tr>
 					{/each}
