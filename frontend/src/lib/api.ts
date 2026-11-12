@@ -99,3 +99,15 @@ export interface DashboardData {
 	};
 	recent: (DashboardOrderRef & { offeredPrice: number | null })[];
 }
+
+// Data dari /schedule/upcoming (daftar pekerjaan dengan jatuh tempo)
+export interface UpcomingData {
+	overdueCount: number;
+	soonCount: number;
+	items: (DashboardOrderRef & {
+		startDate: string | null;
+		dueDate: string;
+		daysLeft: number; // negatif = sudah lewat
+		overdue: boolean;
+	})[];
+}

@@ -44,6 +44,7 @@
 	let ev = $derived(data.summary.evaluation);
 	let next = $derived(transitions[data.order.status] ?? []);
 
+	// Harga kesepakatan (dipakai saat status jadi deal) dan harga untuk simulasi
 	// Nilai awal diambil dari data saat halaman dibuka (disengaja)
 	// svelte-ignore state_referenced_locally
 	let finalPrice = $state(Number(data.order.offeredPrice) || 0);
@@ -52,6 +53,33 @@
 
 	// true selama form dikirim, mencegah kiriman ganda
 	let submitting = $state(false);
+	let savingSchedule = $state(false);
+
+	// Jadwal pengerjaan. Kolom tanggal ada di order, tetapi belum ada di tipe Order.
+	type Sched = { startDate: string | null; dueDate: string | null };
+	let sched = $derived(data.order as unknown as Sched);
+
+	const today = new Date().toLocaleDateString('en-CA');
+	const dayDiff = (to: string) =>
+		Math.round((Date.parse(`${to}T00:00:00`) - Date.parse(`${today}T00:00:00`)) / 86_400_000);
+	const tgl = (d: string) =>
+		new Date(`${d}T00:00:00`).toLocaleDateString('id-ID', {
+			day: 'numeric',
+			month: 'long',
+			year: 'numeric'
+		});
+
+	// Penanda jatuh tempo hanya untuk pekerjaan yang sedang dijanjikan (deal dan dikerjakan)
+	let dueLabel = $derived.by(() => {
+		if (!sched.dueDate || !['deal', 'dikerjakan'].includes(data.order.status)) return null;
+		const left = dayDiff(sched.dueDate);
+		if (left < 0) return { text: `Terlambat ${-left} hari`, cls: 'bg-red-100 text-red-700' };
+		if (left === 0) return { text: 'Jatuh tempo hari ini', cls: 'bg-amber-100 text-amber-800' };
+		if (left <= 7) return { text: `${left} hari lagi`, cls: 'bg-amber-100 text-amber-800' };
+		return { text: `${left} hari lagi`, cls: 'bg-gray-100 text-gray-700' };
+	});
+
+	let canSchedule = $derived(!['selesai', 'batal'].includes(data.order.status));
 </script>
 
 <main class="mx-auto max-w-5xl p-4 md:p-6">
@@ -123,6 +151,49 @@
 					</form>
 				{/each}
 			</div>
+		{/if}
+	</section>
+
+	<!-- Jadwal pengerjaan -->
+	<section class="card mb-4">
+		<div class="mb-2 flex flex-wrap items-center gap-2">
+			<h2 class="text-lg font-semibold text-brand-900">Jadwal pengerjaan</h2>
+			{#if dueLabel}
+				<span class="rounded-full px-3 py-0.5 text-sm font-semibold {dueLabel.cls}">{dueLabel.text}</span>
+			{/if}
+		</div>
+
+		{#if canSchedule}
+			<form
+				method="POST"
+				action="?/schedule"
+				class="flex flex-wrap items-end gap-3"
+				use:enhance={() => {
+					savingSchedule = true;
+					return async ({ update }) => {
+						await update({ reset: false });
+						savingSchedule = false;
+					};
+				}}
+			>
+				<label class="flex flex-col gap-1 text-sm">
+					Mulai
+					<input name="startDate" type="date" value={sched.startDate ?? ''} class="field w-44" />
+				</label>
+				<label class="flex flex-col gap-1 text-sm">
+					Jatuh tempo
+					<input name="dueDate" type="date" value={sched.dueDate ?? ''} class="field w-44" />
+				</label>
+				<button disabled={savingSchedule} class="btn">
+					{savingSchedule ? 'Menyimpan...' : 'Simpan jadwal'}
+				</button>
+			</form>
+			<p class="mt-2 text-sm text-gray-500">Kosongkan tanggal lalu simpan untuk menghapus jadwal.</p>
+		{:else}
+			<p class="text-gray-600">
+				Mulai: {sched.startDate ? tgl(sched.startDate) : '-'} · Jatuh tempo:
+				{sched.dueDate ? tgl(sched.dueDate) : '-'}
+			</p>
 		{/if}
 	</section>
 

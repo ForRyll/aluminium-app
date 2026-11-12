@@ -25,7 +25,19 @@
 		return String(n);
 	};
 
+	// Penanda jatuh tempo: merah kalau terlambat, kuning kalau tinggal 7 hari atau kurang
+	const dueInfo = (left: number) => {
+		if (left < 0) return { text: `Terlambat ${-left} hari`, cls: 'bg-red-100 text-red-700' };
+		if (left === 0) return { text: 'Hari ini', cls: 'bg-amber-100 text-amber-800' };
+		if (left <= 7) return { text: `${left} hari lagi`, cls: 'bg-amber-100 text-amber-800' };
+		return { text: `${left} hari lagi`, cls: 'bg-gray-100 text-gray-700' };
+	};
+
+	const tgl = (d: string) =>
+		new Date(`${d}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+
 	let dash = $derived(data.dash);
+	let up = $derived(data.upcoming);
 	let maxIncome = $derived(
 		dash ? Math.max(...dash.incomeByMonth.map((m) => m.total), 1) : 1
 	);
@@ -64,6 +76,49 @@
 				<p class="mt-1 text-2xl font-bold text-gray-700">{dash.cards.pendingOrders} order</p>
 			</div>
 		</div>
+
+		<!-- Jadwal dan jatuh tempo -->
+		{#if up}
+			<section class="mb-6 rounded-2xl border p-4">
+				<h2 class="mb-3 flex flex-wrap items-center gap-2 text-lg font-semibold">
+					Jadwal dan jatuh tempo
+					{#if up.overdueCount > 0}
+						<span class="rounded-full bg-red-100 px-2 py-0.5 text-sm text-red-700">
+							{up.overdueCount} terlambat
+						</span>
+					{/if}
+					{#if up.soonCount > 0}
+						<span class="rounded-full bg-amber-100 px-2 py-0.5 text-sm text-amber-800">
+							{up.soonCount} dalam 7 hari
+						</span>
+					{/if}
+				</h2>
+				{#if up.items.length === 0}
+					<p class="rounded-lg bg-gray-50 p-3 text-gray-500">
+						Belum ada pekerjaan yang punya jatuh tempo. Isi jadwal di halaman detail order.
+					</p>
+				{:else}
+					<ul class="grid gap-2">
+						{#each up.items as o (o.id)}
+							{@const d = dueInfo(o.daysLeft)}
+							<li>
+								<a href="/orders/{o.id}" class="block rounded-lg border p-3 hover:bg-brand-50">
+									<div class="flex flex-wrap items-center justify-between gap-2">
+										<span class="font-medium">{o.orderNumber} · {o.customerName}</span>
+										<span class="rounded-full px-3 py-0.5 text-xs font-semibold {d.cls}">{d.text}</span>
+									</div>
+									<p class="text-sm text-gray-500">{o.title}</p>
+									<p class="text-sm">
+										Jatuh tempo <strong>{tgl(o.dueDate)}</strong>
+										<span class="ml-2 rounded px-2 py-0.5 text-xs {badge[o.status]}">{o.status}</span>
+									</p>
+								</a>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</section>
+		{/if}
 
 		<!-- Grafik pemasukan 6 bulan -->
 		<section class="mb-6 rounded-2xl border p-4">
