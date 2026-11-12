@@ -11,9 +11,12 @@
 </script>
 
 <main class="mx-auto max-w-5xl p-4 md:p-6">
-	<div class="mb-4">
-		<h1 class="page-title">Katalog Material</h1>
-		<p class="text-gray-500">Harga di sini dipakai saat membuat order baru.</p>
+	<div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+		<div>
+			<h1 class="page-title">Katalog Material</h1>
+			<p class="text-gray-500">Harga di sini dipakai saat membuat order baru.</p>
+		</div>
+		<a href="/materials/harga-massal" class="btn-outline">Ubah harga massal</a>
 	</div>
 
 	{#if form?.messages}
