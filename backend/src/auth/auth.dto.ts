@@ -24,3 +24,15 @@ export class SetupDto {
   @MaxLength(100)
   password: string;
 }
+
+// Untuk mengganti password dari halaman Akun
+export class ChangePasswordDto {
+  @IsString()
+  @MaxLength(100)
+  currentPassword: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password baru minimal 8 karakter' })
+  @MaxLength(100)
+  newPassword: string;
+}

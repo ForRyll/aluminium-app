@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { LoginDto, SetupDto } from './auth.dto';
+import { ChangePasswordDto, LoginDto, SetupDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';
 
@@ -24,5 +24,14 @@ export class AuthController {
   @Get('me')
   me(@Req() req: { user?: unknown }) {
     return req.user;
+  }
+
+  // Ganti password akun yang sedang login
+  @Post('change-password')
+  changePassword(
+    @Req() req: { user?: { sub: string } },
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.auth.changePassword(req.user!.sub, dto);
   }
 }

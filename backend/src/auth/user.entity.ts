@@ -17,6 +17,10 @@ export class User {
   @Column({ type: 'varchar', length: 200 })
   passwordHash: string;
 
+  // Kapan password terakhir diganti. Token yang dibuat sebelumnya tidak berlaku lagi.
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordChangedAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }
