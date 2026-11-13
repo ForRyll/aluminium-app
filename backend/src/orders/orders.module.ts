@@ -6,6 +6,8 @@ import { OrderItem } from './entities/order-item.entity';
 import { OrderPhoto } from './entities/order-photo.entity';
 import { Order } from './entities/order.entity';
 import { Payment } from './entities/payment.entity';
+import { OrderListController } from './order-list.controller';
+import { OrderListService } from './order-list.service';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { PaymentsController } from './payments.controller';
@@ -31,7 +33,14 @@ import { ScheduleService } from './schedule.service';
     PaymentsController,
     PhotosController,
     ScheduleController,
+    OrderListController,
   ],
-  providers: [OrdersService, PaymentsService, PhotosService, ScheduleService],
+  providers: [
+    OrdersService,
+    PaymentsService,
+    PhotosService,
+    ScheduleService,
+    OrderListService,
+  ],
 })
 export class OrdersModule {}
