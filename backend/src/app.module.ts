@@ -9,6 +9,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ExportModule } from './export/export.module';
 import { MaterialsModule } from './materials/materials.module';
 import { OrdersModule } from './orders/orders.module';
+import { CalculatorModule } from './calculator/calculator.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { OrdersModule } from './orders/orders.module';
     AuthModule,
     DashboardModule,
     ExportModule,
+    CalculatorModule
   ],
   controllers: [AppController],
   providers: [AppService],

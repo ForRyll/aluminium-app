@@ -42,5 +42,6 @@ import { ScheduleService } from './schedule.service';
     ScheduleService,
     OrderListService,
   ],
+  exports: [OrdersService],
 })
 export class OrdersModule {}
