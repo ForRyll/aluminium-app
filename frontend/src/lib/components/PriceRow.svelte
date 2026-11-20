@@ -19,12 +19,16 @@
     fields,
     action = 'simpan',
     submitLabel = 'Simpan',
+    deletable = false,
+    extra = {},
   }: {
     kind: string;
     id?: string;
     fields: FieldDef[];
     action?: 'simpan' | 'tambah';
     submitLabel?: string;
+    deletable?: boolean;
+    extra?: Record<string, string>; // isian tersembunyi, mis. kode produk
   } = $props();
 
   // Awalan nama kolom memberi tahu server jenis nilainya
@@ -52,15 +56,16 @@
   method="POST"
   action={`?/${action}`}
   class="flex flex-wrap items-start gap-3 border-b border-gray-100 py-3"
-  use:enhance={() => {
+  use:enhance={({ action: target }) => {
+    const deleting = target.search.includes('hapus');
     saving = true;
     msg = '';
     return async ({ result, update }) => {
       await update({ reset: false });
       saving = false;
-      if (result.type === 'success') {
+      if (result.type === 'success' || result.type === 'redirect') {
         ok = true;
-        msg = action === 'tambah' ? 'Ditambahkan' : 'Tersimpan';
+        msg = deleting ? 'Dihapus' : action === 'tambah' ? 'Ditambahkan' : 'Tersimpan';
         if (action === 'tambah') vals = { ...initial };
       } else if (result.type === 'failure') {
         ok = false;
@@ -74,6 +79,9 @@
 >
   <input type="hidden" name="kind" value={kind} />
   {#if id}<input type="hidden" name="id" value={id} />{/if}
+  {#each Object.entries(extra) as [k, v] (k)}
+    <input type="hidden" name={'s_' + k} value={v} />
+  {/each}
 
   {#each fields as f (f.key)}
     {#if f.type === 'info'}
@@ -110,8 +118,20 @@
     {/if}
   {/each}
 
-  <div class="mt-4 flex items-center gap-3">
+  <div class="mt-4 flex flex-wrap items-center gap-3">
     <button class="btn" disabled={saving}>{saving ? 'Menyimpan…' : submitLabel}</button>
+    {#if deletable}
+      <button
+        formaction="?/hapus"
+        disabled={saving}
+        class="rounded-full border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+        onclick={(e) => {
+          if (!confirm('Hapus baris ini?')) e.preventDefault();
+        }}
+      >
+        Hapus
+      </button>
+    {/if}
     {#if msg}<span class="text-sm {ok ? 'text-emerald-600' : 'text-red-600'}">{msg}</span>{/if}
   </div>
 </form>

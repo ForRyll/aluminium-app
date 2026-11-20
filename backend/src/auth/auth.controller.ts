@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseInterceptors } from '@nestjs/common';
 import { ChangePasswordDto, LoginDto, SetupDto } from './auth.dto';
 import { AuthService } from './auth.service';
+import { LoginThrottleInterceptor } from './login-throttle.interceptor';
 import { Public } from './public.decorator';
 
 @Controller('auth')
@@ -14,8 +15,10 @@ export class AuthController {
     return this.auth.setup(dto);
   }
 
+  // Dibatasi: 5 kali salah dari IP + username yang sama, lalu terkunci 15 menit
   @Public()
   @Post('login')
+  @UseInterceptors(LoginThrottleInterceptor)
   login(@Body() dto: LoginDto) {
     return this.auth.login(dto);
   }

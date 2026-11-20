@@ -63,9 +63,12 @@ export class PricingService {
         required: ['brand', 'series', 'pricePerMeter'],
         unique: ['brand', 'series'],
       },
-      'profile-type': {
+        'profile-type': {
         repo: this.profileTypes,
         fields: { name: 'str', priceOverride: 'numnull' },
+        createOnly: { code: 'str', series: { enum: ['3', '4'] } },
+        required: ['code', 'name', 'series'],
+        unique: ['code'],
       },
       glass: {
         repo: this.glasses,
