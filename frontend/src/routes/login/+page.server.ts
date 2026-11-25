@@ -21,7 +21,11 @@ export const actions: Actions = {
 
         if (!res.ok) {
             const message =
-                res.status === 401 ? 'Username atau password salah' : 'Gagal login, coba lagi';
+                res.status === 401
+                    ? 'Username atau password salah'
+                    : res.status === 429
+                      ? 'Terlalu banyak percobaan gagal. Tunggu 15 menit, lalu coba lagi.'
+                      : 'Gagal login, coba lagi';
             // Password tidak pernah dikembalikan ke layar
             return fail(res.status === 401 ? 401 : 400, { message, username });
         }
