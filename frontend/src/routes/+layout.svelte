@@ -67,6 +67,9 @@
 	// Status buka-tutup menu di HP
 	let open = $state(false);
 
+	// Posisi menu aktif (-1 kalau tidak ada), dipakai untuk menggeser gelembung
+	const activeIdx = $derived(menu.findIndex((m) => isActive(m.href)));
+
 	// Tutup menu HP setiap pindah halaman
 	$effect(() => {
 		void page.url.pathname;
@@ -95,22 +98,65 @@
 				</div>
 			</div>
 
-			<nav class="flex flex-1 flex-col gap-1 pl-3">
-				{#each menu as m (m.href)}
-					<a
-						href={m.href}
-						class="flex items-center gap-3 rounded-l-full py-3 pr-4 pl-5 font-medium transition {isActive(
-							m.href
-						)
-							? 'bg-white text-brand-700'
-							: 'text-brand-100 hover:bg-brand-500'}"
-					>
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d={m.icon} />
-						</svg>
-						{m.label}
-					</a>
-				{/each}
+						<!-- Filter "gooey": membuat gelembung dan dinding konten menyatu dengan lengkung -->
+			<svg width="0" height="0" class="absolute" aria-hidden="true">
+				<defs>
+					<filter id="goo" x="-10%" y="-5%" width="120%" height="110%">
+						<feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+						<feColorMatrix
+							in="blur"
+							mode="matrix"
+							values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -11"
+						/>
+					</filter>
+				</defs>
+			</svg>
+
+			<nav class="relative flex-1 overflow-hidden">
+				<!-- Lapisan gelembung: dinding putih + dua gelembung (satu cepat, satu lambat) -->
+				<div
+					class="pointer-events-none absolute -top-10 -right-6 -bottom-10 left-0"
+					style="filter: url(#goo)"
+					aria-hidden="true"
+				>
+					<span class="absolute top-0 right-0 bottom-0 w-[22px] bg-white"></span>
+					<span
+						class="absolute top-0 right-5 left-3 h-12 rounded-l-full bg-white transition-transform duration-[380ms] ease-[cubic-bezier(.34,1.4,.64,1)] motion-reduce:transition-none"
+						style="transform: translateY({40 + activeIdx * 52}px); opacity: {activeIdx < 0 ? 0 : 1}"
+					></span>
+					<span
+						class="absolute top-0 right-5 left-3 h-12 rounded-l-full bg-white transition-transform duration-700 ease-[cubic-bezier(.25,.8,.25,1)] motion-reduce:transition-none"
+						style="transform: translateY({40 + activeIdx * 52}px); opacity: {activeIdx < 0 ? 0 : 1}"
+					></span>
+				</div>
+
+				<!-- Daftar menu (tinggi tiap menu 48px + jarak 4px, harus sama dengan hitungan 52 di atas) -->
+				<div class="relative flex flex-col gap-1 pl-3">
+					{#each menu as m (m.href)}
+						<a
+							href={m.href}
+							class="group flex h-12 items-center gap-3 rounded-l-full pr-4 pl-5 font-medium transition-colors duration-300 {isActive(
+								m.href
+							)
+								? 'font-semibold text-brand-700'
+								: 'text-brand-100 hover:bg-white/10 hover:text-white'}"
+						>
+							<svg
+								class="h-5 w-5 transition-transform duration-300 group-hover:scale-110"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" d={m.icon} />
+							</svg>
+							{m.label}
+							{#if m.href === '/export' && showBackupReminder}
+								<span class="ml-auto h-2 w-2 rounded-full bg-amber-400" title="Backup sudah lama"></span>
+							{/if}
+						</a>
+					{/each}
+				</div>
 			</nav>
 
 			<form method="POST" action="/logout" class="p-4">
